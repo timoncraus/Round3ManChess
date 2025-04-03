@@ -3,12 +3,15 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Круглая шахматная доска на троих</title>
+    <title>Шахматы на троих</title>
     <link rel="stylesheet" href="{% static 'css/index.css' %}" />
 </head>
 <body>
-    <h2 style="text-align:center;">Шахматы на троих (Круглая доска)</h2>
     <svg id="board" width="600" height="600" viewBox="-350 -350 700 700"></svg>
+
+    <div style="position: absolute; right: 250px; top: 100px; font-size: 20px;" id="cell-id-display">
+        Наведи на клетку
+    </div>
 
     <script src="{% static 'js/index.js' %}"></script>
 </body>
