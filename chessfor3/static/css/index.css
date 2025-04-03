@@ -1,0 +1,44 @@
+svg {
+    display: block;
+    margin: auto;
+    background: #eee;
+}
+.cell {
+
+}
+.cell:hover {
+    fill: lightgreen !important;
+}
+.border {
+    fill: none;
+    stroke: #BE885E;
+    stroke-width: 13;
+}
+.line {
+    fill: none;
+    stroke-width: 2;
+    opacity: 0.6;
+}
+.blue-line {
+    stroke: #2CAFC3; 
+}
+.yellow-line {
+    stroke: #F5E557; 
+}
+.pink-line {
+    stroke: #E48AE1; 
+}
+.green-line {
+    stroke: #5FD75F; 
+}
+.maroon-line {
+    stroke: #4E182A; 
+}
+.gray-line {
+    stroke: #626269; 
+}
+.black-line {
+    stroke: #000000;
+    stroke-width: 1.6;
+    stroke-dasharray: 10, 5;
+}
