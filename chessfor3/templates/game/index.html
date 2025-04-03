@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Круглая шахматная доска на троих</title>
+    <style>
+        svg {
+            display: block;
+            margin: auto;
+            background: #eee;
+        }
+        .cell {
+            fill: white;
+            stroke: black;
+            stroke-width: 1;
+        }
+        .cell:hover {
+            fill: lightblue;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="text-align:center;">Шахматы на троих (Круглая доска)</h2>
+    <svg id="board" width="600" height="600" viewBox="-300 -300 600 600"></svg>
+    
+    <script>
+        const board = document.getElementById("board");
+        const rings = 4; // Количество колец
+        const sectors = 18; // Количество секторов в самом внешнем кольце
+        const radiusStep = 50; // Расстояние между кольцами
+        
+        function drawBoard() {
+            for (let r = 1; r <= rings; r++) {
+                let numSectors = sectors / r;
+                let angleStep = 360 / numSectors;
+                let innerRadius = (r - 1) * radiusStep;
+                let outerRadius = r * radiusStep;
+                
+                for (let s = 0; s < numSectors; s++) {
+                    let startAngle = s * angleStep;
+                    let endAngle = (s + 1) * angleStep;
+                    
+                    let path = createSectorPath(innerRadius, outerRadius, startAngle, endAngle);
+                    let cell = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    cell.setAttribute("d", path);
+                    cell.setAttribute("class", "cell");
+                    board.appendChild(cell);
+                }
+            }
+        }
+        
+        function createSectorPath(innerR, outerR, startAngle, endAngle) {
+            let toRad = angle => (Math.PI / 180) * angle;
+            let x1 = Math.cos(toRad(startAngle)) * innerR;
+            let y1 = Math.sin(toRad(startAngle)) * innerR;
+            let x2 = Math.cos(toRad(endAngle)) * innerR;
+            let y2 = Math.sin(toRad(endAngle)) * innerR;
+            let x3 = Math.cos(toRad(endAngle)) * outerR;
+            let y3 = Math.sin(toRad(endAngle)) * outerR;
+            let x4 = Math.cos(toRad(startAngle)) * outerR;
+            let y4 = Math.sin(toRad(startAngle)) * outerR;
+            
+            return `M ${x1} ${y1} A ${innerR} ${innerR} 0 0 1 ${x2} ${y2} 
+                    L ${x3} ${y3} A ${outerR} ${outerR} 0 0 0 ${x4} ${y4} Z`;
+        }
+        
+        drawBoard();
+    </script>
+</body>
+</html>
