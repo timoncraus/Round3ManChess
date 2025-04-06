@@ -4,7 +4,7 @@ svg {
     background: #eee;
     position: absolute;
 }
-.border {
+.outer-border {
     fill: none;
     stroke: #BE885E;
     stroke-width: 20;
