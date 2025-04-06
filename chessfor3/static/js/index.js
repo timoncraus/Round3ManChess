@@ -1,12 +1,17 @@
 const board = document.getElementById("board");
+const viewBoxDict = board.getAttribute("viewBox").split(" ").map(Number);
 const rings = 6; // Количество колец (по вертикали)
 const sectors = 24; // Общее количество клеток по горизонтали
 const radiusStep = 40; // Расстояние между кольцами
 const centerRadius = 100; // Увеличиваем радиус центральной пустой клетки
-const outerBorderRadius = (rings * radiusStep) + centerRadius; // Радиус внешней границы
+const outerBorderThick = 9
+const outerBorderRadius = (rings * radiusStep) + centerRadius + outerBorderThick; // Радиус внешней границы
 const angleStep = 360 / sectors;
 const letters = "ABCDEFGHIJKL"
-const figure_width = 47
+const figure_height = 50
+
+let someonesDragging = false;
+let chosenCellId = null;
 
 const lineColors = ["yellow-line", "blue-line", "pink-line", "black-line", 
     "green-line", "maroon-line", "gray-line", "yellow-line"]
@@ -35,10 +40,11 @@ function drawBoard() {
 
             // Чередование цветов клеток
             let color = (r + s) % 2 === 0 ? "#DCC8BA" : "#A45C4B";
+            cell.color = color;
             cell.setAttribute("fill", color);
             cell.setAttribute("class", "cell");
             let letter = letters[(sectors - s) % letters.length]
-            if(s==0 || s > letters.length) {
+            if(s === 0 || s > letters.length) {
                 cell.setAttribute("id", letter + (rings+r));
             }
             else {
@@ -51,8 +57,8 @@ function drawBoard() {
             cell.setAttribute("y", getY(midAngle) * midRadius);
             
             board.appendChild(cell);
-            if(r==rings) {
-                drawArc(midAngle, midRadius, lineColors[s%8]);
+            if(r === rings) {
+                drawArc(midAngle, midRadius, lineColors[s%lineColors.length]);
             }
         }
     }
@@ -76,6 +82,7 @@ function drawBoard() {
         text.setAttribute("font-size", "16");
         text.setAttribute("font-family", `sans-serif`);
         text.setAttribute("fill", "#000");
+        text.setAttribute("class", "board-letter");
         text.setAttribute("transform", `rotate(${midAngle-90}, 
             ${Math.cos(toRad(midAngle)) * outerBorderRadius}, 
             ${Math.sin(toRad(midAngle)) * outerBorderRadius})`);
@@ -83,6 +90,7 @@ function drawBoard() {
         board.appendChild(text);
     }
 }
+drawBoard();
 
 function toRad(angle) {
     return (Math.PI / 180) * angle;
@@ -151,17 +159,47 @@ function drawArc(startAngle, startRadius, lineColor) {
     board.appendChild(arc);
 }
 
-drawBoard();
 
 document.querySelectorAll(".cell").forEach(cell => {
     cell.addEventListener("mouseover", function () {
-        document.getElementById("cell-id-display").textContent = "Клетка: " + this.id;
+        overCell(cell);
     });
     
     cell.addEventListener("mouseout", function () {
-        document.getElementById("cell-id-display").textContent = "Наведи на клетку";
+        outCell(cell);
     });
 });
+
+document.querySelectorAll(".cell").forEach(cell => {
+    let cellBorder = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    cellBorder.setAttribute("id", cell.id + "Border");
+    cellBorder.setAttribute("d", cell.getAttribute("d"));
+    cellBorder.setAttribute("fill", "none");
+    cellBorder.setAttribute("stroke", "white");
+    cellBorder.setAttribute("stroke-width", "0");
+    board.appendChild(cellBorder);
+});
+
+function overCell(cell) {
+    if(!someonesDragging){
+        cell.setAttribute("fill", "lightgreen");
+    }
+    else {
+        document.querySelector("#" + cell.id + "Border").setAttribute("stroke-width", "10");
+        chosenCellId = cell.id;
+    }
+    document.getElementById("cell-id-display").textContent = "Клетка: " + cell.id;
+}
+
+function outCell(cell) {
+    if(!someonesDragging){
+        cell.setAttribute("fill", cell.color);
+    }
+    else {
+        document.querySelector("#" + cell.id + "Border").setAttribute("stroke-width", "0");
+    }
+    document.getElementById("cell-id-display").textContent = "Наведи на клетку";
+}
 
 figures_pos = {
     "A1": "rook-white",
@@ -219,16 +257,134 @@ figures_pos = {
     "L11": "pawn-gray",
 }
 
+function drawFigures() {
+    const boundBoard = board.getBoundingClientRect();
 
-document.querySelectorAll(".cell").forEach(cell => {
-    if(figures_pos[cell.id] != undefined && figures_pos[cell.id] != null) {
-        let figure = document.createElementNS("http://www.w3.org/2000/svg", "image");
-        figure.setAttribute("href", `/static/images/${figures_pos[cell.id]}.png`);
-        figure.setAttribute("x", cell.getAttribute("x") - figure_width/2);
-        figure.setAttribute("y", cell.getAttribute("y") - figure_width/2);
-        figure.setAttribute("width", figure_width);
-        figure.setAttribute("height", figure_width);
-        figure.setAttribute("class", "figure");
-        board.appendChild(figure);
+    document.querySelectorAll(".figure").forEach(el => el.remove());
+
+    document.querySelectorAll(".cell").forEach(cell => {
+        if(figures_pos[cell.id] !== undefined && figures_pos[cell.id] !== null) {
+            const imageUrl = `${images}/${figures_pos[cell.id]}.png`;
+            const img = new Image();
+
+            img.onload = function () {
+
+                const figure = document.createElement('div');
+
+                figure.cellId = cell.id;
+                
+                figure.style.backgroundImage = `url(${imageUrl})`;
+                figure.style.backgroundSize = 'cover';
+                figure.relation = img.naturalWidth / img.naturalHeight;
+                figure.setAttribute("class", "figure");
+                figure.widthRelat = parseFloat(board.getAttribute("width")) / viewBoxDict[2];
+                figure.heightRelat = parseFloat(board.getAttribute("height")) / viewBoxDict[3];
+                figure.style.width = figure_height * figure.relation + 'px';
+                figure.style.height = figure_height + 'px';
+
+                figure.centerX = boundBoard.x + boundBoard.width/2;
+                figure.centerY = boundBoard.y + boundBoard.height/2;
+                
+                setFigure(figure, cell);
+
+                document.body.appendChild(figure);
+
+                figure.addEventListener('mouseover', function () {
+                    let cell = document.querySelector("#" + figure.cellId);
+                    overCell(cell);
+                    figure.style.cursor = 'grab';
+                });
+                figure.addEventListener('mouseout', function () {
+                    let cell = document.querySelector("#" + figure.cellId);
+                    outCell(cell);
+                });
+                figure.addEventListener('mousedown', function (e) {
+                    if(!someonesDragging) {
+                        figure.isDragging = true;
+                        someonesDragging = true;
+                    }
+                    
+                    figure.dragOffsetX = figure.offsetWidth / 2;
+                    figure.dragOffsetY = figure.offsetHeight / 2;
+                    figure.style.cursor = 'grabbing';
+                    figure.style.pointerEvents = 'none';
+                    figure.style.zIndex = "100";
+                });
+                document.addEventListener('mousemove', function (e) {
+                    if(figure.isDragging) {
+                        let x = e.clientX - figure.dragOffsetX;
+                        let y = e.clientY - figure.dragOffsetY;
+
+                        figure.style.left = x + 'px';
+                        figure.style.top = y + 'px';
+                    }
+                });
+                document.addEventListener('mouseup', function(e) {
+                    if(figure.isDragging) {
+                        figure.isDragging = false;
+                        someonesDragging = false;
+                        if(chosenCellId === null) {
+                            figure.style.left = figure.style.realLeft;
+                            figure.style.top = figure.style.realTop;
+                            figure.style.zIndex = figure.style.realZIndex;
+                        }
+                        else {
+                            console.log(figure.cellId, chosenCellId)
+                            if (figures_pos[chosenCellId] !== undefined && figures_pos[chosenCellId] !== null) {
+                                document.querySelectorAll(".figure").forEach(existingFigure => {
+                                    if (existingFigure.cellId === chosenCellId) {
+                                        existingFigure.remove();
+                                    }
+                                });
+                            }
+
+                            figures_pos[chosenCellId] = figures_pos[figure.cellId];
+                            figures_pos[figure.cellId] = null;
+                            figure.cellId = chosenCellId;
+
+                            const cell = document.querySelector("#" + chosenCellId);
+                            setFigure(figure, cell);
+                            chosenCellId = null;
+
+
+                        }
+                        
+                        figure.style.pointerEvents = 'auto';
+                        document.querySelectorAll(".cell").forEach(cell => {
+                            document.querySelector("#" + cell.id + "Border").setAttribute("stroke-width", "0");
+                            cell.setAttribute("fill", cell.color);
+                        });
+                    }
+                });
+            }
+
+            img.src = imageUrl;
+        }
+    });
+}
+
+function setFigure(figure, cell) {
+    figure.style.left = (figure.centerX - figure_height*figure.relation/2 
+        + parseFloat(cell.getAttribute("x")) * figure.widthRelat) + 'px';
+    figure.style.top = (figure.centerY - figure_height/2 
+        + parseFloat(cell.getAttribute("y")) * figure.heightRelat) + 'px';
+    figure.style.realLeft = figure.style.left;
+    figure.style.realTop = figure.style.top;
+
+    const match = cell.id.match(/^([A-Za-z]+)(\d+)$/);
+    const char = match[1];
+    const number = parseInt(match[2]);
+    if(number > 6) {
+        figure.style.zIndex = rings - Math.abs(rings - number)
+             + 6*(Math.abs(letters.length/2 - letters.indexOf(char)));
     }
-});
+    else {
+        figure.style.zIndex = Math.abs(rings - number)
+         + 6*(letters.length - Math.abs(letters.length/2 - letters.indexOf(char)));
+    }
+    figure.style.realZIndex = figure.style.zIndex;
+    figure.isDragging = false;
+}
+
+window.addEventListener("load", drawFigures);
+window.addEventListener("resize", drawFigures);

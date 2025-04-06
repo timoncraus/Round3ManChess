@@ -2,15 +2,12 @@ svg {
     display: block;
     margin: auto;
     background: #eee;
-
-}
-.cell:hover {
-    fill: lightgreen;
+    position: absolute;
 }
 .border {
     fill: none;
     stroke: #BE885E;
-    stroke-width: 13;
+    stroke-width: 20;
 }
 .line {
     pointer-events: none;
@@ -41,6 +38,14 @@ svg {
     stroke-width: 1.6;
     stroke-dasharray: 10, 5;
 }
+
+.board-letter {
+    user-select: none;
+}
 .figure {
-    pointer-events: none;
+    position: absolute;
+    draggable: true;
+}
+#cell-id-display {
+    user-select: none;
 }

@@ -7,11 +7,19 @@
     <link rel="stylesheet" href="{% static 'css/index.css' %}" />
 </head>
 <body>
-    <svg id="board" width="600" height="600" viewBox="-350 -350 700 700"></svg>
+    <div style="display: flex; justify-content: center;">
+        <svg id="board" width="680" height="680" viewBox="-375 -375 750 750"></svg>
+    </div>
 
-    <div style="position: absolute; right: 250px; top: 100px; font-size: 20px;" id="cell-id-display">
+    <div style="position: absolute; right: 50px; top: 100px; font-size: 20px;" id="cell-id-display">
         Наведи на клетку
     </div>
+
+
+
+    <script>
+        const images = "{% static 'images' %}";
+    </script>
 
     <script src="{% static 'js/index.js' %}"></script>
 </body>
