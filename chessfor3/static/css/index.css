@@ -49,3 +49,17 @@ svg {
 #cell-id-display {
     user-select: none;
 }
+
+.stripe {
+    pointer-events: none;
+    fill: none;
+    stroke: green;
+}
+
+.thick {
+    stroke-width: 13;
+}
+
+.thin {
+    stroke-width: 7;
+}

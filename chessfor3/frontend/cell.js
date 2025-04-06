@@ -103,6 +103,10 @@ export function outCell(cell) {
 
 
 export function paintAvailCells(figure) {
+    document.querySelectorAll(".cell").forEach(cell => {
+        cell.setAttribute("fill", cell.color);
+        cell.available = false;
+    })
     const availCellIds = getAvailCells(figure);
     availCellIds.forEach(availCellId => {
         const availCell = document.querySelector("#" + availCellId);
@@ -111,4 +115,5 @@ export function paintAvailCells(figure) {
         }
         availCell.available = true;
     })
+
 }

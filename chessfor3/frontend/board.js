@@ -42,6 +42,10 @@ function drawCellsAndArcs() {
             }
         }
     }
+
+    drawGreenStripes(3, 5, "thin");
+    drawGreenStripes(5, 6, "thick");
+
     drawAllCellBorders();
 }
 
@@ -77,10 +81,9 @@ function drawLetterOuterBorder(sector) {
 }
 
 function drawArc(values, lineColor) {
-    const angle = values[0]
-    const radius = values[1]
+    const [angle, radius] = values;
     const path = `
-        M ${getX(angle) * radius} ${getY(angle) * radius} 
+        M ${getPoint(angle, radius)} 
 
         ${getArcPoint(angle, radius, 1.0, 1.0)}
         ${getArcPoint(angle, radius, 2.0, 2.0)}
@@ -97,7 +100,7 @@ function drawArc(values, lineColor) {
         ${getArcPoint(angle, radius, -2.0, 2.0)}
         ${getArcPoint(angle, radius, -1.0, 1.0)}
 
-        A ${radius} ${radius} 0 0 0 ${getX(angle) * radius} ${getY(angle) * radius}
+        A ${radius} ${radius} 0 0 0 ${getPoint(angle, radius)}
         Z
     `;
 
@@ -110,5 +113,30 @@ function drawArc(values, lineColor) {
 function getArcPoint(angle, radius, kX, kY, kRadius=1) {
     return `A ${radius*kRadius} ${radius * kRadius} 0 0 0 `+
         `${getX(angle - angleStep * kX) * (radius - radiusStep * kY)} `+
-        `${getY(angle - angleStep * kX) * (radius - radiusStep * kY)}`
+        `${getY(angle - angleStep * kX) * (radius - radiusStep * kY)} `;
+}
+
+function getPoint(angle, radius) {
+    return `${getX(angle) * radius} ${getY(angle) * radius} `;
+}
+
+function drawGreenStripes(ring1, ring2, kindStripe) {
+    const radius1 = ring1 * radiusStep + centerRadius;
+    const radius2 = ring2 * radiusStep + centerRadius;
+    for(let sector = 5; sector < sectors; sector += 8) {
+        const angle = sector * angleStep;
+        drawGreenStripe(radius1, radius2, angle, kindStripe);
+    }
+}
+
+function drawGreenStripe(radius1, radius2, angle, kindStripe) {
+    const path = `
+        M ${getPoint(angle, radius1)}
+        L ${getPoint(angle, radius2)}
+        Z
+    `;
+    const stripe = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    stripe.setAttribute("d", path);
+    stripe.setAttribute("class", `stripe ${kindStripe}`);
+    board.appendChild(stripe);
 }

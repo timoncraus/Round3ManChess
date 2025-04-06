@@ -28,7 +28,8 @@ function drawFigure(cell, imageUrl, img, boundBoard) {
     const figure = document.createElement('div');
 
     figure.cellId = cell.id;
-    
+    figure.name = figures_pos[cell.id];
+
     figure.style.backgroundImage = `url(${imageUrl})`;
     figure.style.backgroundSize = 'cover';
     figure.relation = img.naturalWidth / img.naturalHeight;
@@ -40,6 +41,17 @@ function drawFigure(cell, imageUrl, img, boundBoard) {
 
     figure.centerX = boundBoard.x + boundBoard.width/2;
     figure.centerY = boundBoard.y + boundBoard.height/2;
+
+    const [kind, player] = figure.name.split("-");
+    const [char, number] = parseCellId(cell.id);
+    if(kind === "pawn") {
+        if(number > 6) {
+            figure.pawnDirection = -1;
+        }
+        else {
+            figure.pawnDirection = 1;
+        }
+    }
     
     setFigure(figure, cell);
 
@@ -110,7 +122,9 @@ function upFigure(figure) {
             state.clickedFigure = figure;
         }
         else {
-            console.log(figure.cellId, state.chosenCellId)
+            // figure.cellId - предыдущая клетка, ее очищаем
+            // state.chosenCellId - новая клетка, утверждаем на ней фигуру
+            console.log(figure.cellId, state.chosenCellId);
             if (figures_pos[state.chosenCellId] !== undefined && figures_pos[state.chosenCellId] !== null) {
                 document.querySelectorAll(".figure").forEach(existingFigure => {
                     if (existingFigure.cellId === state.chosenCellId) {
@@ -119,15 +133,18 @@ function upFigure(figure) {
                 });
             }
 
-            figures_pos[state.chosenCellId] = figures_pos[figure.cellId];
-            figures_pos[figure.cellId] = null;
-            figure.cellId = state.chosenCellId;
-
-            const cell = document.querySelector("#" + state.chosenCellId);
-            setFigure(figure, cell);
-            state.chosenCellId = null;
-
-            state.clickedFigure = null;
+            const [kind, player] = figure.name.split("-");
+            const [char, number] = parseCellId(state.chosenCellId);
+            if(kind === "pawn" && 
+                    (figure.pawnDirection == 1 && number == 12) || 
+                    (figure.pawnDirection == -1 && number == 1)) {
+                figure.name = "queen-" + player;
+                updateFiguresPos(figure);
+                drawAllFigures();
+            }
+            else {
+                updateFiguresPos(figure);
+            }
         }
         figure.style.pointerEvents = 'auto';
         document.querySelectorAll(".cell").forEach(cell => {
@@ -141,6 +158,17 @@ function upFigure(figure) {
         }
         
     }
+}
+
+function updateFiguresPos(figure) {
+    figures_pos[state.chosenCellId] = figure.name;
+    figures_pos[figure.cellId] = null;
+    figure.cellId = state.chosenCellId;
+    const cell = document.querySelector("#" + state.chosenCellId);
+    setFigure(figure, cell);
+
+    state.chosenCellId = null;
+    state.clickedFigure = null;
 }
 
 function resetFigurePos(figure) {
@@ -157,9 +185,7 @@ function setFigure(figure, cell) {
     figure.style.realLeft = figure.style.left;
     figure.style.realTop = figure.style.top;
 
-    const match = cell.id.match(/^([A-Za-z]+)(\d+)$/);
-    const char = match[1];
-    const number = parseInt(match[2]);
+    const [char, number] = parseCellId(cell.id);
     if(number > 6) {
         figure.style.zIndex = rings - Math.abs(rings - number)
              + 6*(Math.abs(letters.length/2 - letters.indexOf(char)));
@@ -170,4 +196,11 @@ function setFigure(figure, cell) {
     }
     figure.style.realZIndex = figure.style.zIndex;
     figure.isDragging = false;
+}
+
+export function parseCellId(cellId) {
+    const match = cellId.match(/^([A-Za-z]+)(\d+)$/);
+    const char = match[1];
+    const number = parseInt(match[2]);
+    return [char, number]
 }

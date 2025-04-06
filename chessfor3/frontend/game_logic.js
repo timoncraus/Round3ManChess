@@ -1,10 +1,13 @@
 import { rings, sectors, letters } from './board.js';
+import { parseCellId } from './figure.js';
 
 export let state = {
     someonesDragging: false,
     chosenCellId: null,
     clickedFigure: null
 };
+
+const userPlayer = "white";
 
 export let figures_pos = {
     "A1": "rook-white",
@@ -63,19 +66,54 @@ export let figures_pos = {
 }
 
 export function getAvailCells(figure) {
-    let availCells = []
-    for (let ring = 1; ring <= rings; ring++) {
-        for (let sector = 0; sector < sectors; sector++) {
-            const letter = letters[(sectors - sector) % letters.length]
-            if(letter === "A") {
-                if(sector === 0 || sector > letters.length) {
-                    availCells.push(letter + (rings + ring));
-                }
-                else {
-                    availCells.push(letter + (rings - ring + 1));
-                }
-            }
+    const [kind, player] = figure.name.split("-");
+    const [char, number] = parseCellId(figure.cellId);
+    if(kind === "pawn") {
+        return getAvailCellsPawn(figure, player, char, number);
+    }
+    else if(kind === "bishop") {
+        
+    }
+    else if(kind === "knight") {
+        
+    }
+    else if(kind === "rook") {
+        
+    }
+    else if(kind === "queen") {
+
+    }
+    else if(kind === "king") {
+        
+    }
+    else {
+        console.log("Вид фигуры не распознан");
+    }
+    return [];
+}
+
+function getAvailCellsPawn(figure, player, char, number) {
+    let availCells = [];
+
+    const forwardId = char + (number + figure.pawnDirection);
+    if(figures_pos[forwardId] === null || figures_pos[forwardId] === undefined) {
+        availCells.push(forwardId);
+    }
+    if( (figure.pawnDirection === 1 && number >= 4) ||
+            (figure.pawnDirection === -1 && number <= 9) ) {
+        pushAvailDiagonalCellPawn(availCells, figure, player, char, number, -1);
+        pushAvailDiagonalCellPawn(availCells, figure, player, char, number, 1);
+    }
+    console.log(availCells)
+    return availCells;
+}
+
+function pushAvailDiagonalCellPawn(availCells, figure, player, char, number, diagonal) {
+    const forwardRightId = letters[letters.indexOf(char) + diagonal] + (number + figure.pawnDirection);
+    if(figures_pos[forwardRightId] !== null && figures_pos[forwardRightId] !== undefined) {
+        const [kind_fw, player_fw] = figures_pos[forwardRightId].split("-");
+        if(player_fw != player) {
+            availCells.push(forwardRightId);
         }
     }
-    return availCells;
 }
