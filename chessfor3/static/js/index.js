@@ -12,6 +12,7 @@ const figure_height = 50
 
 let someonesDragging = false;
 let chosenCellId = null;
+let clickedFigure = null;
 
 const lineColors = ["yellow-line", "blue-line", "pink-line", "black-line", 
     "green-line", "maroon-line", "gray-line", "yellow-line"]
@@ -55,6 +56,8 @@ function drawBoard() {
             midRadius = (innerRadius + outerRadius) / 2
             cell.setAttribute("x", getX(midAngle) * midRadius);
             cell.setAttribute("y", getY(midAngle) * midRadius);
+
+            cell.available = false;
             
             board.appendChild(cell);
             if(r === rings) {
@@ -185,6 +188,9 @@ function overCell(cell) {
         cell.setAttribute("fill", "lightgreen");
     }
     else {
+        if(chosenCellId !== null) {
+            document.querySelector("#" + chosenCellId + "Border").setAttribute("stroke-width", "0");
+        }
         document.querySelector("#" + cell.id + "Border").setAttribute("stroke-width", "10");
         chosenCellId = cell.id;
     }
@@ -193,10 +199,13 @@ function overCell(cell) {
 
 function outCell(cell) {
     if(!someonesDragging){
-        cell.setAttribute("fill", cell.color);
-    }
-    else {
-        document.querySelector("#" + cell.id + "Border").setAttribute("stroke-width", "0");
+        if(clickedFigure !== null && cell.available) {
+            cell.setAttribute("fill", "green");
+        }
+        else {
+            cell.setAttribute("fill", cell.color);
+        }
+        
     }
     document.getElementById("cell-id-display").textContent = "Наведи на клетку";
 }
@@ -290,9 +299,7 @@ function drawFigures() {
                 document.body.appendChild(figure);
 
                 figure.addEventListener('mouseover', function () {
-                    let cell = document.querySelector("#" + figure.cellId);
-                    overCell(cell);
-                    figure.style.cursor = 'grab';
+                    overFigure(figure);
                 });
                 figure.addEventListener('mouseout', function () {
                     let cell = document.querySelector("#" + figure.cellId);
@@ -302,13 +309,16 @@ function drawFigures() {
                     if(!someonesDragging) {
                         figure.isDragging = true;
                         someonesDragging = true;
+
+                        figure.dragOffsetX = figure.offsetWidth / 2;
+                        figure.dragOffsetY = figure.offsetHeight / 2;
+                        figure.style.cursor = 'grabbing';
+                        figure.style.pointerEvents = 'none';
+                        figure.style.zIndex = "100";
+
+                        paintAvailCells(figure);
+                        clickedFigure = figure;
                     }
-                    
-                    figure.dragOffsetX = figure.offsetWidth / 2;
-                    figure.dragOffsetY = figure.offsetHeight / 2;
-                    figure.style.cursor = 'grabbing';
-                    figure.style.pointerEvents = 'none';
-                    figure.style.zIndex = "100";
                 });
                 document.addEventListener('mousemove', function (e) {
                     if(figure.isDragging) {
@@ -323,10 +333,11 @@ function drawFigures() {
                     if(figure.isDragging) {
                         figure.isDragging = false;
                         someonesDragging = false;
-                        if(chosenCellId === null) {
-                            figure.style.left = figure.style.realLeft;
-                            figure.style.top = figure.style.realTop;
-                            figure.style.zIndex = figure.style.realZIndex;
+                        if (chosenCellId === figure.cellId || chosenCellId === null) {
+                            overFigure(figure);
+                            resetFigurePos(figure);
+                            paintAvailCells(figure);
+                            clickedFigure = figure;
                         }
                         else {
                             console.log(figure.cellId, chosenCellId)
@@ -346,14 +357,19 @@ function drawFigures() {
                             setFigure(figure, cell);
                             chosenCellId = null;
 
-
+                            clickedFigure = null;
                         }
-                        
                         figure.style.pointerEvents = 'auto';
                         document.querySelectorAll(".cell").forEach(cell => {
                             document.querySelector("#" + cell.id + "Border").setAttribute("stroke-width", "0");
-                            cell.setAttribute("fill", cell.color);
                         });
+                        if(clickedFigure === null) {
+                            document.querySelectorAll(".cell").forEach(cell => {
+                                cell.setAttribute("fill", cell.color);
+                                cell.available = false;
+                            });
+                        }
+                        
                     }
                 });
             }
@@ -361,6 +377,46 @@ function drawFigures() {
             img.src = imageUrl;
         }
     });
+}
+
+function paintAvailCells(figure) {
+    let availCellIds = getAvailCells(figure);
+    availCellIds.forEach(availCellId => {
+        let availCell = document.querySelector("#" + availCellId);
+        if(availCell.getAttribute("fill") !== "lightgreen") {
+            availCell.setAttribute("fill", "green");
+        }
+        availCell.available = true;
+    })
+}
+
+function getAvailCells(figure) {
+    let availCells = []
+    for (let r = 1; r <= rings; r++) {
+        for (let s = 0; s < sectors; s++) {
+            let letter = letters[(sectors - s) % letters.length]
+            if(letter === "A") {
+                if(s === 0 || s > letters.length) {
+                    availCells.push(letter + (rings+r));
+                }
+                else {
+                    availCells.push(letter + (rings-r+1));
+                }
+            }
+        }
+    }
+    return availCells;
+}
+
+function overFigure(figure) {
+    let cell = document.querySelector("#" + figure.cellId);
+    overCell(cell);
+    figure.style.cursor = 'grab';
+}
+function resetFigurePos(figure) {
+    figure.style.left = figure.style.realLeft;
+    figure.style.top = figure.style.realTop;
+    figure.style.zIndex = figure.style.realZIndex;
 }
 
 function setFigure(figure, cell) {
