@@ -126,9 +126,7 @@ function upFigure(figure) {
 
             const [kind, player] = figure.name.split("-");
             const [char, number] = parseCellId(state.chosenCellId);
-            if(kind === "pawn" && 
-                    (figure.pawnDirection == 1 && number == 12) || 
-                    (figure.pawnDirection == -1 && number == 1)) {
+            if( kind === "pawn" && (number == 12 || number == 1) ) {
                 figure.name = "queen-" + player;
                 updateFiguresPos(figure);
                 drawAllFigures();
@@ -169,15 +167,14 @@ function resetFigurePos(figure) {
 }
 
 function setFigure(figure, cell) {
-    const [kind, player] = figure.name.split("-");
-    const [char, number] = parseCellId(cell.id);
-
     figure.style.left = (figure.centerX - figure_height*figure.relation/2 
         + parseFloat(cell.getAttribute("x")) * figure.widthRelat) + 'px';
     figure.style.top = (figure.centerY - figure_height/2 
         + parseFloat(cell.getAttribute("y")) * figure.heightRelat) + 'px';
     figure.style.realLeft = figure.style.left;
     figure.style.realTop = figure.style.top;
+
+    const [char, number] = parseCellId(cell.id);
 
     if(number > 6) {
         figure.style.zIndex = rings - Math.abs(rings - number)
@@ -190,6 +187,12 @@ function setFigure(figure, cell) {
     figure.style.realZIndex = figure.style.zIndex;
     figure.isDragging = false;
 
+    setPawnDirection(figure, cell);
+}
+
+function setPawnDirection(figure, cell) {
+    const [kind, player] = figure.name.split("-");
+    const [char, number] = parseCellId(cell.id);
 
     if(kind === "pawn") {
         if(player === "white") {
