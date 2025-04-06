@@ -104,16 +104,34 @@ function getAvailCellsPawn(figure, player, char, number) {
         pushAvailDiagonalCellPawn(availCells, figure, player, char, number, -1);
         pushAvailDiagonalCellPawn(availCells, figure, player, char, number, 1);
     }
-    console.log(availCells)
     return availCells;
 }
 
-function pushAvailDiagonalCellPawn(availCells, figure, player, char, number, diagonal) {
-    const forwardRightId = letters[letters.indexOf(char) + diagonal] + (number + figure.pawnDirection);
-    if(figures_pos[forwardRightId] !== null && figures_pos[forwardRightId] !== undefined) {
-        const [kind_fw, player_fw] = figures_pos[forwardRightId].split("-");
+function pushAvailDiagonalCellPawn(availCells, figure, player, char, number, right) {
+    const forwardDiagonalId = letters[(letters.indexOf(char) + right) % letters.length] 
+                                                            + (number + figure.pawnDirection);
+    if(figures_pos[forwardDiagonalId] !== null && figures_pos[forwardDiagonalId] !== undefined) {
+        const [kind_fw, player_fw] = figures_pos[forwardDiagonalId].split("-");
         if(player_fw != player) {
-            availCells.push(forwardRightId);
+            availCells.push(forwardDiagonalId);
         }
+    }
+}
+
+function getAvailCellsBishop(figure, player, char, number) {
+    let availCells = [];
+
+
+    pushAvailDiagonalCellsBishop(availCells, figure, player, char, number, 1, 1);
+    pushAvailDiagonalCellsBishop(availCells, figure, player, char, number, -1, 1);
+    pushAvailDiagonalCellsBishop(availCells, figure, player, char, number, 1, -1);
+    pushAvailDiagonalCellsBishop(availCells, figure, player, char, number, -1, -1);
+
+    return availCells;
+}
+
+function pushAvailDiagonalCellsBishop(availCells, figure, player, char, number, up, right) {
+    while(figures_pos[forwardId] === null || figures_pos[forwardId] === undefined) {
+        const diagonalId = letters[letters.indexOf(char) + right] + (number + up);
     }
 }

@@ -42,16 +42,7 @@ function drawFigure(cell, imageUrl, img, boundBoard) {
     figure.centerX = boundBoard.x + boundBoard.width/2;
     figure.centerY = boundBoard.y + boundBoard.height/2;
 
-    const [kind, player] = figure.name.split("-");
-    const [char, number] = parseCellId(cell.id);
-    if(kind === "pawn") {
-        if(number > 6) {
-            figure.pawnDirection = -1;
-        }
-        else {
-            figure.pawnDirection = 1;
-        }
-    }
+    
     
     setFigure(figure, cell);
 
@@ -178,6 +169,9 @@ function resetFigurePos(figure) {
 }
 
 function setFigure(figure, cell) {
+    const [kind, player] = figure.name.split("-");
+    const [char, number] = parseCellId(cell.id);
+
     figure.style.left = (figure.centerX - figure_height*figure.relation/2 
         + parseFloat(cell.getAttribute("x")) * figure.widthRelat) + 'px';
     figure.style.top = (figure.centerY - figure_height/2 
@@ -185,7 +179,6 @@ function setFigure(figure, cell) {
     figure.style.realLeft = figure.style.left;
     figure.style.realTop = figure.style.top;
 
-    const [char, number] = parseCellId(cell.id);
     if(number > 6) {
         figure.style.zIndex = rings - Math.abs(rings - number)
              + 6*(Math.abs(letters.length/2 - letters.indexOf(char)));
@@ -196,6 +189,38 @@ function setFigure(figure, cell) {
     }
     figure.style.realZIndex = figure.style.zIndex;
     figure.isDragging = false;
+
+
+    if(kind === "pawn") {
+        if(player === "white") {
+            if(number <= 6 && "ABCDEFGHIJ".includes(char) 
+                    || player === "white" && number >= 7 && !"KL".includes(char)) {
+                figure.pawnDirection = 1;
+            }
+            else {
+                figure.pawnDirection = -1;
+            }
+        }
+
+        if(player === "gray") {
+            if(number >= 7 && "CDEFGHIJKL".includes(char) 
+                    || number <= 6 && !"AB".includes(char)) {
+                figure.pawnDirection = -1;
+            }
+            else {
+                figure.pawnDirection = 1;
+            }
+        }
+        if(player === "black") {
+            if(number <= 6 && "GHIJKL".includes(char) 
+                    || number >= 7 && !"ABCDEF".includes(char) ) {
+                figure.pawnDirection = 1;
+            }
+            else {
+                figure.pawnDirection = -1;
+            }
+        }
+    }
 }
 
 export function parseCellId(cellId) {
