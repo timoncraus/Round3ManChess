@@ -132,10 +132,10 @@ function pushDiagPawnCell(availCells, figure, player, char, number, right) {
 
 function getBihshopCells(figure, player, char, number) {
     let availCells = []
-    func1(availCells, figure, player, char, number)
+    //func1(availCells, figure, player, char, number)
     func2(availCells, figure, player, char, number)
-    func3(availCells, figure, player, char, number)
-    func4(availCells, figure, player, char, number)
+    //func3(availCells, figure, player, char, number)
+    //func4(availCells, figure, player, char, number)
     return availCells
 }
 
@@ -209,7 +209,12 @@ function func2(availCells, figure, player, char, number) {
                 console.log(5)
             }
             else if(letters.indexOf(char) + right < 0) {
-                newChar = letters[letters.length + (letters.indexOf(char) + right)];
+                if(number === 6 && up === 1 || number === 7 && up === -1) {
+                    newChar = letters[(letters.indexOf(char) + 10) % letters.length];
+                }
+                else {
+                    newChar = letters[letters.length + (letters.indexOf(char) + right)];
+                }
                 console.log(6)
             }
             else {
@@ -287,17 +292,14 @@ function func3(availCells, figure, player, char, number) {
             if(right > 0 && newChar < char) {
                 newNumber = (letters.length - (number + up)) + 1;
                 up=-up
-                console.log(1)
             }
             else if(right < 0 && newChar > char) {
 
                 newNumber = (letters.length - (number + up)) + 1;
                 up=-up
-                console.log(2)
             }
             else {
                 newNumber = number + up;
-                console.log(3)
             }
 
             char = newChar;
@@ -324,11 +326,15 @@ function func4(availCells, figure, player, char, number) {
             let newChar;
             if(right === 0) {
                 newChar = char;
-                console.log(5)
             }
             else if(letters.indexOf(char) + right < 0) {
-                newChar = letters[letters.length + (letters.indexOf(char) + right)];
-                console.log(6)
+                if(number === 6 && up === 1 || number === 7 && up === -1) {
+                    newChar = letters[(letters.indexOf(char) + 10) % letters.length];
+                }
+                else {
+                    newChar = letters[letters.length + (letters.indexOf(char) + right)];
+                }
+                
             }
             else {
                 if(number === 6 && up === 1 || number === 7 && up === -1) {
@@ -337,8 +343,6 @@ function func4(availCells, figure, player, char, number) {
                 else {
                     newChar = letters[(letters.indexOf(char) + right) % letters.length];
                 }
-                console.log(7)
-
 
             }
 
@@ -346,7 +350,6 @@ function func4(availCells, figure, player, char, number) {
             if(right > 0 && newChar < char) {
                 newNumber = (letters.length - (number + up)) + 1;
                 up=-up
-                console.log(1)
             }
             else if(right < 0 && newChar > char) {
 
