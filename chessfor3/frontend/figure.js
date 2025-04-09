@@ -2,7 +2,7 @@ import { figures_pos, state } from './game_logic.js';
 import { viewBoxDict, board, rings, letters } from './board.js';
 import { overCell, outCell, paintAvailCells } from './cell.js';
 
-const figure_height = 50
+const figure_height = 46
 
 export function drawAllFigures() {
     const boundBoard = board.getBoundingClientRect();
