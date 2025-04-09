@@ -9,7 +9,7 @@ export let state = {
 
 const userPlayer = "white";
 
-export let figures_pos1 = {
+export let figures_pos = {
     "A1": "rook-white",
     "B1": "knight-white",
     "C1": "bishop-white",
@@ -65,7 +65,7 @@ export let figures_pos1 = {
     "L11": "pawn-gray",
 }
 
-export let figures_pos = {
+export let figures_pos1 = {
     "A1": "bishop-white",
 }
 
@@ -85,10 +85,12 @@ export function getAvailCells(figure) {
         return getRookCells(figure, player, char, number);
     }
     else if(kind === "queen") {
-
+        const bishopCells = getBihshopCells(figure, player, char, number);
+        const rookCells = getRookCells(figure, player, char, number);
+        return bishopCells.concat(rookCells);
     }
     else if(kind === "king") {
-        
+        return getKingCells(figure, player, char, number);
     }
     else {
         console.log("Вид фигуры не распознан");
@@ -132,99 +134,42 @@ function pushDiagPawnCell(availCells, figure, player, char, number, right) {
 
 function getBihshopCells(figure, player, char, number) {
     let availCells = []
-    //func1(availCells, figure, player, char, number)
-    func2(availCells, figure, player, char, number)
-    //func3(availCells, figure, player, char, number)
-    //func4(availCells, figure, player, char, number)
+    pushDiagBishopCells(availCells, figure, player, char, number, 1, 1);
+    pushDiagBishopCells(availCells, figure, player, char, number, 1, -1);
+    pushDiagBishopCells(availCells, figure, player, char, number, -1, 1);
+    pushDiagBishopCells(availCells, figure, player, char, number, -1, -1);
     return availCells
 }
 
-function func1(availCells, figure, player, char, number) {
-
-    let right = 1;
-    let up = 1;
-    while(true) {
-            let newChar;
-            if(right === 0) {
-                newChar = char;
-                console.log(5)
-            }
-            else if(letters.indexOf(char) + right < 0) {
-                newChar = letters[letters.length + (letters.indexOf(char) + right)];
-                console.log(6)
-            }
-            else {
-                if(number === 6 && up === 1 || number === 7 && up === -1) {
-                    newChar = letters[(letters.indexOf(char) + 2) % letters.length];
-                }
-                else {
-                    newChar = letters[(letters.indexOf(char) + right) % letters.length];
-                }
-                console.log(7)
-
-
-            }
-
-            let newNumber;
-            if(right > 0 && newChar < char) {
-                newNumber = (letters.length - (number + up)) + 1;
-                up=-up
-                console.log(1)
-            }
-            else if(right < 0 && newChar > char) {
-
-                newNumber = (letters.length - (number + up)) + 1;
-                up=-up
-                console.log(2)
-            }
-            else {
-                newNumber = number + up;
-                console.log(3)
-            }
-
-            char = newChar;
-            number = newNumber;
-            console.log(char + number)
-
-        
-        if(addCheckCell(availCells, player, char, number)) {
-            continue;
-        }
-        else {
-            break;
-        }
-
+function pushDiagBishopCells(availCells, figure, player, char, number, up, right) {
+    let offset;
+    if((right === 1 && up === 1) || (right === 1 && up === -1)) {
+        offset = 2;
     }
-    return availCells;
-}
+    else {
+        offset = 10;
+    }
 
-function func2(availCells, figure, player, char, number) {
-
-    let right = -1;
-    let up = 1;
     while(true) {
             let newChar;
             if(right === 0) {
                 newChar = char;
-                console.log(5)
             }
             else if(letters.indexOf(char) + right < 0) {
-                if(number === 6 && up === 1 || number === 7 && up === -1) {
-                    newChar = letters[(letters.indexOf(char) + 10) % letters.length];
+                if(offset === 10 && (number === 6 && up === 1 || number === 7 && up === -1)) {
+                    newChar = letters[(letters.indexOf(char) + offset) % letters.length];
                 }
                 else {
                     newChar = letters[letters.length + (letters.indexOf(char) + right)];
                 }
-                console.log(6)
             }
             else {
-                if(number === 6 && up === 1 || number === 7 && up === -1) {
-                    newChar = letters[(letters.indexOf(char) + 10) % letters.length];
+                if((number === 6 && up === 1 || number === 7 && up === -1)) {
+                    newChar = letters[(letters.indexOf(char) + offset) % letters.length];
                 }
                 else {
                     newChar = letters[(letters.indexOf(char) + right) % letters.length];
                 }
-                console.log(7)
 
 
             }
@@ -232,24 +177,19 @@ function func2(availCells, figure, player, char, number) {
             let newNumber;
             if(right > 0 && newChar < char) {
                 newNumber = (letters.length - (number + up)) + 1;
-                up=-up
-                console.log(1)
+                up = -up;
             }
             else if(right < 0 && newChar > char) {
 
                 newNumber = (letters.length - (number + up)) + 1;
-                up=-up
-                console.log(2)
+                up = -up;
             }
             else {
                 newNumber = number + up;
-                console.log(3)
             }
 
             char = newChar;
             number = newNumber;
-            console.log(char + number)
-
         
         if(addCheckCell(availCells, player, char, number)) {
             continue;
@@ -262,192 +202,23 @@ function func2(availCells, figure, player, char, number) {
     return availCells;
 }
 
-function func3(availCells, figure, player, char, number) {
+function getKingCells(figure, player, char, number) {
+    let availCells = [];
 
-    let right = 1;
-    let up = -1;
-    while(true) {
-            let newChar;
-            if(right === 0) {
-                newChar = char;
-                console.log(5)
-            }
-            else if(letters.indexOf(char) + right < 0) {
-                newChar = letters[letters.length + (letters.indexOf(char) + right)];
-                console.log(6)
-            }
-            else {
-                if(number === 6 && up === 1 || number === 7 && up === -1) {
-                    newChar = letters[(letters.indexOf(char) + 2) % letters.length];
-                }
-                else {
-                    newChar = letters[(letters.indexOf(char) + right) % letters.length];
-                }
-                console.log(7)
+    pushCell(availCells, figure, player, char, number, 1, 0);
+    pushCell(availCells, figure, player, char, number, 1, 1);
+    pushCell(availCells, figure, player, char, number, 1, -1);
 
+    pushCell(availCells, figure, player, char, number, 0, 1);
+    pushCell(availCells, figure, player, char, number, 0, -1);
 
-            }
+    pushCell(availCells, figure, player, char, number, -1, 0);
+    pushCell(availCells, figure, player, char, number, -1, 1);
+    pushCell(availCells, figure, player, char, number, -1, -1);
 
-            let newNumber;
-            if(right > 0 && newChar < char) {
-                newNumber = (letters.length - (number + up)) + 1;
-                up=-up
-            }
-            else if(right < 0 && newChar > char) {
-
-                newNumber = (letters.length - (number + up)) + 1;
-                up=-up
-            }
-            else {
-                newNumber = number + up;
-            }
-
-            char = newChar;
-            number = newNumber;
-            console.log(char + number)
-
-        
-        if(addCheckCell(availCells, player, char, number)) {
-            continue;
-        }
-        else {
-            break;
-        }
-
-    }
     return availCells;
 }
 
-function func4(availCells, figure, player, char, number) {
-
-    let right = -1;
-    let up = -1;
-    while(true) {
-            let newChar;
-            if(right === 0) {
-                newChar = char;
-            }
-            else if(letters.indexOf(char) + right < 0) {
-                if(number === 6 && up === 1 || number === 7 && up === -1) {
-                    newChar = letters[(letters.indexOf(char) + 10) % letters.length];
-                }
-                else {
-                    newChar = letters[letters.length + (letters.indexOf(char) + right)];
-                }
-                
-            }
-            else {
-                if(number === 6 && up === 1 || number === 7 && up === -1) {
-                    newChar = letters[(letters.indexOf(char) + 10) % letters.length];
-                }
-                else {
-                    newChar = letters[(letters.indexOf(char) + right) % letters.length];
-                }
-
-            }
-
-            let newNumber;
-            if(right > 0 && newChar < char) {
-                newNumber = (letters.length - (number + up)) + 1;
-                up=-up
-            }
-            else if(right < 0 && newChar > char) {
-
-                newNumber = (letters.length - (number + up)) + 1;
-                up=-up
-                console.log(2)
-            }
-            else {
-                newNumber = number + up;
-                console.log(3)
-            }
-
-            char = newChar;
-            number = newNumber;
-            console.log(char + number)
-
-        
-        if(addCheckCell(availCells, player, char, number)) {
-            continue;
-        }
-        else {
-            break;
-        }
-
-    }
-    return availCells;
-}
-
-function pushBishopCells(availCells, figure, player, char, number, up, right) {
-    for(let i=0;i<40;i++) {
-        if( (number === 6 && up === 1)  || (number === 7 && up === -1)) {
-            let newChar;
-            if(right === 0) {
-                newChar = char;
-            }
-            else if(letters.indexOf(char) + right * 14 < 0) {
-                newChar = letters[letters.length + (letters.indexOf(char) + right * 14) % letters.length];
-                console.log(1)
-            }
-            else {
-                newChar = letters[(letters.indexOf(char) + right * 14) % letters.length];
-                console.log(2)
-            }
-            
-            if("KL".includes(char) && right > 0) {
-                console.log("!!!!!!")
-                up=-up
-                console.log(3)
-            }
-            else {
-                number = number === 7? 6: 7;
-                console.log(4)
-            }
-            char = newChar;
-            console.log("n", (letters.indexOf(char) + right * 14) % letters.length, char + number, up, right)
-            //console.log(4)
-        }
-        else {
-            let newChar;
-            if(right === 0) {
-                newChar = char;
-            }
-            else if(letters.indexOf(char) + right < 0) {
-                newChar = letters[letters.length + (letters.indexOf(char) + right)];
-            }
-            else {
-                newChar = letters[(letters.indexOf(char) + right) % letters.length];
-            }
-
-            let newNumber;
-            if(right > 0 && newChar < char) {
-                newNumber = (letters.length - (number + up)) + 1;
-                console.log(5)
-                up=-up
-
-            }
-            else if(right < 0 && newChar > char) {
-                newNumber = (letters.length - (number + up)) + 1;
-                console.log(6)
-            }
-            else {
-                newNumber = number + up;
-                console.log(7)
-            }
-
-            char = newChar;
-            number = newNumber
-            console.log("m", char + number, up, right)
-        }
-        
-        if(addCheckCell(availCells, player, char, number)) {
-            continue;
-        }
-        else {
-            break;
-        }
-    }
-}
 
 function getKnightCells(figure, player, char, number) {
     let availCells = [];
