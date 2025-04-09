@@ -104,7 +104,9 @@ export function outCell(cell) {
 
 export function paintAvailCells(figure) {
     document.querySelectorAll(".cell").forEach(cell => {
-        cell.setAttribute("fill", cell.color);
+        if(cell.getAttribute("fill") !== "lightgreen") {
+            cell.setAttribute("fill", cell.color);
+        }
         cell.available = false;
     })
     const availCellIds = getAvailCells(figure);

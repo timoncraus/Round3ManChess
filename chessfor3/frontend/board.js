@@ -7,11 +7,11 @@ export const rings = 6;
 export const sectors = 24;
 export const radiusStep = 40;
 export const centerRadius = 100;
-export const outerBorderThick = 9
+export const outerBorderThick = 12
 export const outerBorderRadius = (rings * radiusStep) + centerRadius + outerBorderThick;
 export const angleStep = 360 / sectors;
 export const letters = "ABCDEFGHIJKL"
-export const lineColors = ["yellow-line", "blue-line", "pink-line", "black-line", 
+export const lineColors = ["orange-line", "blue-line", "pink-line", "black-line", 
     "green-line", "maroon-line", "gray-line", "yellow-line"]
 
 export function drawBoard() {
