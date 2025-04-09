@@ -7,7 +7,7 @@ svg {
 .outer-border {
     fill: none;
     stroke: #BE885E;
-    stroke-width: 20;
+    stroke-width: 27;
 }
 .line {
     pointer-events: none;

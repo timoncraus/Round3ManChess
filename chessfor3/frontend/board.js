@@ -7,8 +7,8 @@ export const rings = 6;
 export const sectors = 24;
 export const radiusStep = 40;
 export const centerRadius = 100;
-export const outerBorderThick = 12
-export const outerBorderRadius = (rings * radiusStep) + centerRadius + outerBorderThick;
+export const outerBorderIndent = 13
+export const outerBorderRadius = (rings * radiusStep) + centerRadius + outerBorderIndent;
 export const angleStep = 360 / sectors;
 export const letters = "ABCDEFGHIJKL"
 export const lineColors = ["orange-line", "blue-line", "pink-line", "black-line", 
@@ -65,8 +65,8 @@ function drawLetterOuterBorder(sector) {
     const midAngle = (sector + 0.5) * angleStep;
     const letter = letters[(sectors - sector) % letters.length]
     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    text.setAttribute("x", Math.cos(toRad(midAngle)) * outerBorderRadius + 1);
-    text.setAttribute("y", Math.sin(toRad(midAngle)) * outerBorderRadius + 1);
+    text.setAttribute("x", Math.cos(toRad(midAngle)) * outerBorderRadius + 4);
+    text.setAttribute("y", Math.sin(toRad(midAngle)) * outerBorderRadius + 4);
     text.setAttribute("text-anchor", "middle");
     text.setAttribute("alignment-baseline", "middle");
     text.setAttribute("font-size", "16");
