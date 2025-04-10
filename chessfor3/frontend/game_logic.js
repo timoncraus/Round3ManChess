@@ -107,89 +107,47 @@ function getPawnCells(figure, player, char, number) {
     }
 
     const doubleForwardId = char + (number + figure.pawnDirection * 2);
-    if( (figure.pawnDirection === 1 && number === 2) ||
-            (figure.pawnDirection === -1 && number === 11) ) {
+    if( (figures_pos[doubleForwardId] === null || figures_pos[doubleForwardId] === undefined) &&
+        ((figure.pawnDirection === 1 && number === 2) ||
+            (figure.pawnDirection === -1 && number === 11)) ) {
         availCells.push(doubleForwardId);
     }
 
     if( (figure.pawnDirection === 1 && number >= 4) ||
             (figure.pawnDirection === -1 && number <= 9) ) {
-        pushDiagPawnCell(availCells, figure, player, char, number, -1);
         pushDiagPawnCell(availCells, figure, player, char, number, 1);
+        pushDiagPawnCell(availCells, figure, player, char, number, -1);
     }
 
     return availCells;
 }
 
 function pushDiagPawnCell(availCells, figure, player, char, number, right) {
-    const forwardDiagonalId = letters[(letters.indexOf(char) + right) % letters.length] 
-                                                            + (number + figure.pawnDirection);
-    if(figures_pos[forwardDiagonalId] !== null && figures_pos[forwardDiagonalId] !== undefined) {
-        const [kind_fw, player_fw] = figures_pos[forwardDiagonalId].split("-");
-        if(player_fw != player) {
-            availCells.push(forwardDiagonalId);
-        }
+    let up = figure.pawnDirection;
+    const [sideChar, sideNumber] = moveToCell(char, number, 0, right);
+    const offset = getDiagOffset(right, up);
+    [char, number, up] = moveToDiagCell(char, number, up, right, offset);
+
+    if(figures_pos[char + number] !== null && figures_pos[char + number] !== undefined ||
+        figures_pos[sideChar + sideNumber + "-double-pawn"] === true) {
+        addCheckCell(availCells, player, char, number);
     }
 }
 
 function getBihshopCells(figure, player, char, number) {
     let availCells = []
-    pushDiagBishopCells(availCells, figure, player, char, number, 1, 1);
-    pushDiagBishopCells(availCells, figure, player, char, number, 1, -1);
-    pushDiagBishopCells(availCells, figure, player, char, number, -1, 1);
-    pushDiagBishopCells(availCells, figure, player, char, number, -1, -1);
+    pushInfinityDiagCells(availCells, figure, player, char, number, 1, 1);
+    pushInfinityDiagCells(availCells, figure, player, char, number, 1, -1);
+    pushInfinityDiagCells(availCells, figure, player, char, number, -1, 1);
+    pushInfinityDiagCells(availCells, figure, player, char, number, -1, -1);
     return availCells
 }
 
-function pushDiagBishopCells(availCells, figure, player, char, number, up, right) {
-    let offset;
-    if((right === 1 && up === 1) || (right === 1 && up === -1)) {
-        offset = 2;
-    }
-    else {
-        offset = 10;
-    }
+function pushInfinityDiagCells(availCells, figure, player, char, number, up, right) {
+    const offset = getDiagOffset(right, up);
 
     while(true) {
-            let newChar;
-            if(right === 0) {
-                newChar = char;
-            }
-            else if(letters.indexOf(char) + right < 0) {
-                if(offset === 10 && (number === 6 && up === 1 || number === 7 && up === -1)) {
-                    newChar = letters[(letters.indexOf(char) + offset) % letters.length];
-                }
-                else {
-                    newChar = letters[letters.length + (letters.indexOf(char) + right)];
-                }
-            }
-            else {
-                if((number === 6 && up === 1 || number === 7 && up === -1)) {
-                    newChar = letters[(letters.indexOf(char) + offset) % letters.length];
-                }
-                else {
-                    newChar = letters[(letters.indexOf(char) + right) % letters.length];
-                }
-
-
-            }
-
-            let newNumber;
-            if(right > 0 && newChar < char) {
-                newNumber = (letters.length - (number + up)) + 1;
-                up = -up;
-            }
-            else if(right < 0 && newChar > char) {
-
-                newNumber = (letters.length - (number + up)) + 1;
-                up = -up;
-            }
-            else {
-                newNumber = number + up;
-            }
-
-            char = newChar;
-            number = newNumber;
+        [char, number, up] = moveToDiagCell(char, number, up, right, offset);
         
         if(addCheckCell(availCells, player, char, number)) {
             continue;
@@ -199,6 +157,7 @@ function pushDiagBishopCells(availCells, figure, player, char, number, up, right
         }
 
     }
+
     return availCells;
 }
 
@@ -206,15 +165,14 @@ function getKingCells(figure, player, char, number) {
     let availCells = [];
 
     pushCell(availCells, figure, player, char, number, 1, 0);
-    pushCell(availCells, figure, player, char, number, 1, 1);
-    pushCell(availCells, figure, player, char, number, 1, -1);
-
     pushCell(availCells, figure, player, char, number, 0, 1);
     pushCell(availCells, figure, player, char, number, 0, -1);
-
     pushCell(availCells, figure, player, char, number, -1, 0);
-    pushCell(availCells, figure, player, char, number, -1, 1);
-    pushCell(availCells, figure, player, char, number, -1, -1);
+
+    pushDiagCell(availCells, figure, player, char, number, 1, 1);
+    pushDiagCell(availCells, figure, player, char, number, 1, -1);
+    pushDiagCell(availCells, figure, player, char, number, -1, 1);
+    pushDiagCell(availCells, figure, player, char, number, -1, -1);
 
     return availCells;
 }
@@ -266,27 +224,7 @@ function pushInfinityCells(availCells, figure, player, char, number, up, right) 
     }
 }
 
-function addCheckCell(availCells, player, char, number) {
-    if(number < 1 || number > 12) {
-        return false;
-    }
-    const newCellId = char + number;
-    
-    if(figures_pos[newCellId] === null || figures_pos[newCellId] === undefined) {
-        availCells.push(newCellId);
-        return true;
-    }
-    const [otherKind, otherPlayer] = figures_pos[newCellId].split("-");
-    if(otherPlayer === player) {
-        return false;
-    }
-    else {
-        availCells.push(newCellId);
-        return false;
-    }
-}
-
-function moveToCell(char, number, up, right) {
+export function moveToCell(char, number, up, right) {
     let newChar;
     if(right === 0) {
         newChar = char;
@@ -308,9 +246,81 @@ function moveToCell(char, number, up, right) {
     else {
         newNumber = number + up;
     }
-
-    char = newChar;
-    number = newNumber;
     
-    return [newChar, number];
+    return [newChar, newNumber];
+}
+
+function pushDiagCell(availCells, figure, player, char, number, up, right) {
+    const offset = getDiagOffset(right, up);
+    [char, number, up] = moveToDiagCell(char, number, up, right, offset);
+    addCheckCell(availCells, player, char, number)
+    return availCells;
+}
+
+function moveToDiagCell(char, number, up, right, offset) {
+    let newChar;
+    if(right === 0) {
+        newChar = char;
+    }
+    else if(letters.indexOf(char) + right < 0) {
+        if(offset === 10 && (number === 6 && up === 1 || number === 7 && up === -1)) {
+            newChar = letters[(letters.indexOf(char) + offset) % letters.length];
+        }
+        else {
+            newChar = letters[letters.length + (letters.indexOf(char) + right)];
+        }
+    }
+    else {
+        if((number === 6 && up === 1 || number === 7 && up === -1)) {
+            newChar = letters[(letters.indexOf(char) + offset) % letters.length];
+        }
+        else {
+            newChar = letters[(letters.indexOf(char) + right) % letters.length];
+        }
+
+
+    }
+
+    let newNumber;
+    if(right > 0 && newChar < char) {
+        newNumber = (letters.length - (number + up)) + 1;
+        up = -up;
+    }
+    else if(right < 0 && newChar > char) {
+
+        newNumber = (letters.length - (number + up)) + 1;
+        up = -up;
+    }
+    else {
+        newNumber = number + up;
+    }
+
+    return [newChar, newNumber, up];
+}
+
+function getDiagOffset(right, up) {
+    if((right === 1 && up === 1) || (right === 1 && up === -1)) {
+        return 2;
+    }
+    return 10;
+}
+
+function addCheckCell(availCells, player, char, number) {
+    if(number < 1 || number > 12) {
+        return false;
+    }
+    const newCellId = char + number;
+    
+    if(figures_pos[newCellId] === null || figures_pos[newCellId] === undefined) {
+        availCells.push(newCellId);
+        return true;
+    }
+    const [otherKind, otherPlayer] = figures_pos[newCellId].split("-");
+    if(otherPlayer === player) {
+        return false;
+    }
+    else {
+        availCells.push(newCellId);
+        return false;
+    }
 }

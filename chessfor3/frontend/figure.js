@@ -1,4 +1,4 @@
-import { figures_pos, state } from './game_logic.js';
+import { figures_pos, state, moveToCell } from './game_logic.js';
 import { viewBoxDict, board, rings, letters } from './board.js';
 import { overCell, outCell, paintAvailCells } from './cell.js';
 
@@ -115,7 +115,11 @@ function upFigure(figure) {
         else {
             // figure.cellId - предыдущая клетка, ее очищаем
             // state.chosenCellId - новая клетка, утверждаем на ней фигуру
-            console.log(figure.cellId, state.chosenCellId);
+            const [kind, player] = figure.name.split("-");
+            const [char, number] = parseCellId(state.chosenCellId);
+            const [prevChar, prevNumber] = parseCellId(figure.cellId);
+
+            const [sideChar, sideNumber] = moveToCell(char, number, -figure.pawnDirection, 0);
             if (figures_pos[state.chosenCellId] !== undefined && figures_pos[state.chosenCellId] !== null) {
                 document.querySelectorAll(".figure").forEach(existingFigure => {
                     if (existingFigure.cellId === state.chosenCellId) {
@@ -123,10 +127,28 @@ function upFigure(figure) {
                     }
                 });
             }
+            else if(figures_pos[sideChar + sideNumber + "-double-pawn"] === true) {
+                document.querySelectorAll(".figure").forEach(existingFigure => {
+                    if (existingFigure.cellId === sideChar + sideNumber) {
+                        existingFigure.remove();
+                    }
+                    figures_pos[sideChar + sideNumber] = null;
+                    figures_pos[sideChar + sideNumber + "-double-pawn"] === null;
+                });
+            }
 
-            const [kind, player] = figure.name.split("-");
-            const [char, number] = parseCellId(state.chosenCellId);
-            if( kind === "pawn" && (number == 12 || number == 1) ) {
+            if(kind === "pawn" && ( (figure.pawnDirection === 1 && number === 4 && prevNumber === 2) || 
+                                    (figure.pawnDirection === -1 && number === 9 && prevNumber === 11) )
+            ) {
+                figures_pos[state.chosenCellId + "-double-pawn"] = true;
+            }
+            else if(figures_pos[state.chosenCellId + "-double-pawn"] !== null && 
+                    figures_pos[state.chosenCellId + "-double-pawn"] !== undefined) {
+                figures_pos[state.chosenCellId + "-double-pawn"] = null;
+            }
+
+
+            if( kind === "pawn" && (number === 12 || number === 1) ) {
                 figure.name = "queen-" + player;
                 updateFiguresPos(figure);
                 drawAllFigures();
