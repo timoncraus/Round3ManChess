@@ -103,6 +103,7 @@ function moveFigure(e, figure){
 }
 
 function upFigure(figure) {
+    console.log(figures_pos)
     if(figure.isDragging) {
         figure.isDragging = false;
         state.someonesDragging = false;
@@ -113,39 +114,16 @@ function upFigure(figure) {
             state.clickedFigure = figure;
         }
         else {
-            // figure.cellId - предыдущая клетка, ее очищаем
+            // figure.cellId - предыдущая клетка, ее очищаем 
             // state.chosenCellId - новая клетка, утверждаем на ней фигуру
+
             const [kind, player] = figure.name.split("-");
             const [char, number] = parseCellId(state.chosenCellId);
             const [prevChar, prevNumber] = parseCellId(figure.cellId);
 
-            const [sideChar, sideNumber] = moveToCell(char, number, -figure.pawnDirection, 0);
-            if (figures_pos[state.chosenCellId] !== undefined && figures_pos[state.chosenCellId] !== null) {
-                document.querySelectorAll(".figure").forEach(existingFigure => {
-                    if (existingFigure.cellId === state.chosenCellId) {
-                        existingFigure.remove();
-                    }
-                });
-            }
-            else if(figures_pos[sideChar + sideNumber + "-double-pawn"] === true) {
-                document.querySelectorAll(".figure").forEach(existingFigure => {
-                    if (existingFigure.cellId === sideChar + sideNumber) {
-                        existingFigure.remove();
-                    }
-                    figures_pos[sideChar + sideNumber] = null;
-                    figures_pos[sideChar + sideNumber + "-double-pawn"] === null;
-                });
-            }
+            removeEnemy(figure, char, number);
 
-            if(kind === "pawn" && ( (figure.pawnDirection === 1 && number === 4 && prevNumber === 2) || 
-                                    (figure.pawnDirection === -1 && number === 9 && prevNumber === 11) )
-            ) {
-                figures_pos[state.chosenCellId + "-double-pawn"] = true;
-            }
-            else if(figures_pos[state.chosenCellId + "-double-pawn"] !== null && 
-                    figures_pos[state.chosenCellId + "-double-pawn"] !== undefined) {
-                figures_pos[state.chosenCellId + "-double-pawn"] = null;
-            }
+            setDoublePawnMark(figure, kind, number, prevNumber);
 
 
             if( kind === "pawn" && (number === 12 || number === 1) ) {
@@ -168,6 +146,38 @@ function upFigure(figure) {
             });
         }
         
+    }
+}
+
+function removeEnemy(figure, char, number) {
+    const [sideChar, sideNumber] = moveToCell(char, number, -figure.pawnDirection, 0);
+    if (figures_pos[state.chosenCellId] !== undefined && figures_pos[state.chosenCellId] !== null) {
+        document.querySelectorAll(".figure").forEach(existingFigure => {
+            if (existingFigure.cellId === state.chosenCellId) {
+                existingFigure.remove();
+            }
+        });
+    }
+    else if(figures_pos[sideChar + sideNumber + "-double-pawn"] === true) {
+        document.querySelectorAll(".figure").forEach(existingFigure => {
+            if (existingFigure.cellId === sideChar + sideNumber) {
+                figures_pos[sideChar + sideNumber] = null;
+                figures_pos[sideChar + sideNumber + "-double-pawn"] = null;
+                existingFigure.remove();
+            }
+        });
+    }
+}
+
+function setDoublePawnMark(figure, kind, number, prevNumber) {
+    if(kind === "pawn" && ( (figure.pawnDirection === 1 && number === 4 && prevNumber === 2) || 
+                            (figure.pawnDirection === -1 && number === 9 && prevNumber === 11) )
+    ) {
+        figures_pos[state.chosenCellId + "-double-pawn"] = true;
+    }
+    else if(figures_pos[state.chosenCellId + "-double-pawn"] !== null && 
+            figures_pos[state.chosenCellId + "-double-pawn"] !== undefined) {
+        figures_pos[state.chosenCellId + "-double-pawn"] = null;
     }
 }
 
