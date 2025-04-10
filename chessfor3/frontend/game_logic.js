@@ -9,6 +9,14 @@ export let state = {
 
 const userPlayer = "white";
 
+export let captured_figures = {
+    "white": [],
+    "gray": [],
+    "black": []
+}
+
+export let double_pawns = {}
+
 export let figures_pos = {
     "A1": "rook-white",
     "B1": "knight-white",
@@ -65,42 +73,37 @@ export let figures_pos = {
     "L11": "pawn-gray",
 }
 
-export let figures_pos1 = {
-    "A1": "bishop-white",
-}
-
 export function getAvailCells(figure) {
     const [kind, player] = figure.name.split("-");
     const [char, number] = parseCellId(figure.cellId);
+    let availCells = [figure.cellId];
     if(kind === "pawn") {
-        return getPawnCells(figure, player, char, number);
+        return getPawnCells(availCells, figure, player, char, number);
     }
     else if(kind === "bishop") {
-        return getBihshopCells(figure, player, char, number);
+        return getBihshopCells(availCells, figure, player, char, number);
     }
     else if(kind === "knight") {
-        return getKnightCells(figure, player, char, number);
+        return getKnightCells(availCells, figure, player, char, number);
     }
     else if(kind === "rook") {
-        return getRookCells(figure, player, char, number);
+        return getRookCells(availCells, figure, player, char, number);
     }
     else if(kind === "queen") {
-        const bishopCells = getBihshopCells(figure, player, char, number);
-        const rookCells = getRookCells(figure, player, char, number);
+        const bishopCells = getBihshopCells(availCells, figure, player, char, number);
+        const rookCells = getRookCells(availCells, figure, player, char, number);
         return bishopCells.concat(rookCells);
     }
     else if(kind === "king") {
-        return getKingCells(figure, player, char, number);
+        return getKingCells(availCells, figure, player, char, number);
     }
     else {
         console.log("Вид фигуры не распознан");
     }
-    return [];
+    return availCells;
 }
 
-function getPawnCells(figure, player, char, number) {
-    let availCells = [];
-
+function getPawnCells(availCells, figure, player, char, number) {
     const forwardId = char + (number + figure.pawnDirection);
     if(figures_pos[forwardId] === null || figures_pos[forwardId] === undefined) {
         availCells.push(forwardId);
@@ -129,13 +132,12 @@ function pushDiagPawnCell(availCells, figure, player, char, number, right) {
     [char, number, up] = moveToDiagCell(char, number, up, right, offset);
 
     if(figures_pos[char + number] !== null && figures_pos[char + number] !== undefined ||
-        figures_pos[sideChar + sideNumber + "-double-pawn"] === true) {
+        double_pawns[sideChar + sideNumber + "-double-pawn"] === true) {
         addCheckCell(availCells, player, char, number);
     }
 }
 
-function getBihshopCells(figure, player, char, number) {
-    let availCells = []
+function getBihshopCells(availCells, figure, player, char, number) {
     pushInfinityDiagCells(availCells, figure, player, char, number, 1, 1);
     pushInfinityDiagCells(availCells, figure, player, char, number, 1, -1);
     pushInfinityDiagCells(availCells, figure, player, char, number, -1, 1);
@@ -161,9 +163,7 @@ function pushInfinityDiagCells(availCells, figure, player, char, number, up, rig
     return availCells;
 }
 
-function getKingCells(figure, player, char, number) {
-    let availCells = [];
-
+function getKingCells(availCells, figure, player, char, number) {
     pushCell(availCells, figure, player, char, number, 1, 0);
     pushCell(availCells, figure, player, char, number, 0, 1);
     pushCell(availCells, figure, player, char, number, 0, -1);
@@ -178,9 +178,7 @@ function getKingCells(figure, player, char, number) {
 }
 
 
-function getKnightCells(figure, player, char, number) {
-    let availCells = [];
-
+function getKnightCells(availCells, figure, player, char, number) {
     pushCell(availCells, figure, player, char, number, 2, 1);
     pushCell(availCells, figure, player, char, number, 2, -1);
     pushCell(availCells, figure, player, char, number, -2, 1);
@@ -194,9 +192,7 @@ function getKnightCells(figure, player, char, number) {
     return availCells;
 }
 
-function getRookCells(figure, player, char, number) {
-    let availCells = [];
-
+function getRookCells(availCells, figure, player, char, number) {
     pushInfinityCells(availCells, figure, player, char, number, 1, 0);
     pushInfinityCells(availCells, figure, player, char, number, -1, 0);
     pushInfinityCells(availCells, figure, player, char, number, 0, 1);

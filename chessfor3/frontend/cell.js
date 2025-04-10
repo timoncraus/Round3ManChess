@@ -1,6 +1,7 @@
 import { getX, getY } from './common_math.js';
 import { board, rings, sectors, letters } from './board.js';
 import { state, getAvailCells } from './game_logic.js';
+import { downFigure, upFigure } from './figure.js';
 
 export function drawCell(ring, sector, innerRadius, outerRadius, startAngle, endAngle) {
     const path = createCellPath(innerRadius, outerRadius, startAngle, endAngle);
@@ -55,6 +56,14 @@ function addCellListeners(cell) {
     
     cell.addEventListener("mouseout", function () {
         outCell(cell);
+    });
+    cell.addEventListener('mouseup', function() {
+        if(state.clickedFigure != null) {
+            state.chosenCellId = cell.id;
+            state.clickedFigure.isDragging = true;
+            state.someonesDragging = true;
+            upFigure(state.clickedFigure);
+        }
     });
 }
 

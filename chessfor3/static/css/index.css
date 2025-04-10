@@ -49,6 +49,9 @@ svg {
     position: absolute;
     draggable: true;
 }
+.mini-figure {
+    position: absolute;
+}
 #cell-id-display {
     user-select: none;
 }
@@ -65,4 +68,20 @@ svg {
 
 .thin {
     stroke-width: 7;
+}
+
+.player-border {
+    stroke-width: 0;
+}
+
+.black {
+    fill: #000000;
+}
+
+.white {
+    fill: #FFFFFF;
+}
+
+.gray {
+    fill: #808080;
 }

@@ -15,12 +15,80 @@ export const lineColors = ["orange-line", "blue-line", "pink-line", "black-line"
     "green-line", "maroon-line", "gray-line", "yellow-line"]
 
 export function drawBoard() {
-    drawcenterCircle();
+    drawLowerPlayerBorder();
+    drawPlayerCircle(5, "black");
+    drawPlayerCircle(13, "white");
+    drawPlayerCircle(-3, "gray");
+
+    drawCenterCircle();
     drawCellsAndArcs();
     drawOuterBorder();
+
+    const miniFigureHeight = 25;
+    const boundBoard = board.getBoundingClientRect();
+
+    const imageUrl = `${images}/pawn-gray.png`;
+    const img = new Image();
+
+    img.onload = function () {
+        const miniFigure = document.createElement('div');
+        miniFigure.style.backgroundImage = `url(${imageUrl})`;
+        miniFigure.style.backgroundSize = 'cover';
+        miniFigure.relation = img.naturalWidth / img.naturalHeight;
+        miniFigure.setAttribute("class", "mini-figure");
+        miniFigure.widthRelat = parseFloat(board.getAttribute("width")) / viewBoxDict[2] - 0.1;
+        miniFigure.heightRelat = parseFloat(board.getAttribute("height")) / viewBoxDict[3];
+        miniFigure.style.width = miniFigureHeight * miniFigure.relation + 'px';
+        miniFigure.style.height = miniFigureHeight + 'px';
+
+        miniFigure.centerX = boundBoard.x + boundBoard.width/2;
+        miniFigure.centerY = boundBoard.y + boundBoard.height/2;
+
+        const x = getX(angleStep * 15) * (outerBorderRadius + 45);
+        const y = getY(angleStep * 15) * (outerBorderRadius + 45);
+
+        miniFigure.style.left = (miniFigure.centerX - miniFigureHeight*miniFigure.relation/2 
+            + parseFloat(x) * miniFigure.widthRelat) + 'px';
+        miniFigure.style.top = (miniFigure.centerY - miniFigureHeight/2 
+            + parseFloat(y) * miniFigure.heightRelat) + 'px';
+
+        document.body.appendChild(miniFigure);
+    }
+
+    img.src = imageUrl;
+
+    
+    
+
+
+    
 }
 
-function drawcenterCircle() {
+function drawPlayerCircle(angleK, player) {
+    const [angle, radius] = [angleStep * angleK, outerBorderRadius - 21];
+    const path = `
+        M ${getPoint(angle, radius)} 
+        ${getArcPoint(angle, radius, 0.0, -1.0)}
+        ${getArcPoint(angle, radius, 1.0, -1.0)}
+        ${getArcPoint(angle, radius, 2.0, -1.0)}
+        ${getArcPoint(angle, radius, 3.0, -1.0)}
+        ${getArcPoint(angle, radius, 4.0, -1.0)}
+        ${getArcPoint(angle, radius, 5.0, -1.0)}
+        ${getArcPoint(angle, radius, 6.0, -1.0)}
+        ${getArcPoint(angle, radius, 7.0, -1.0)}
+        ${getArcPoint(angle, radius, 8.0, -1.0)}
+        ${getArcPoint(angle, radius, 8.0, 0.0)}
+
+        Z
+    `;
+
+    const arc = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    arc.setAttribute("d", path);
+    arc.setAttribute("class", `player-border ${player}`);
+    board.appendChild(arc);
+}
+
+function drawCenterCircle() {
     const centerCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     centerCircle.setAttribute("cx", 0);
     centerCircle.setAttribute("cy", 0);
@@ -47,6 +115,15 @@ function drawCellsAndArcs() {
     drawGreenStripes(5, 6, "thick");
 
     drawAllCellBorders();
+}
+
+function drawLowerPlayerBorder() {
+    const playerBorder = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    playerBorder.setAttribute("cx", 0);
+    playerBorder.setAttribute("cy", 0);
+    playerBorder.setAttribute("r", outerBorderRadius + 21);
+    playerBorder.setAttribute("class", "player-border black");
+    board.appendChild(playerBorder);
 }
 
 function drawOuterBorder() {
@@ -86,18 +163,26 @@ function drawArc(values, lineColor) {
         M ${getPoint(angle, radius)} 
 
         ${getArcPoint(angle, radius, 1.0, 1.0)}
+        ${getArcPoint(angle, radius, 1.5, 1.5)}
         ${getArcPoint(angle, radius, 2.0, 2.0)}
+        ${getArcPoint(angle, radius, 2.5, 2.5)}
         ${getArcPoint(angle, radius, 3.0, 3.0)}
+        ${getArcPoint(angle, radius, 3.5, 3.5)}
         ${getArcPoint(angle, radius, 4.0, 4.0)}
+        ${getArcPoint(angle, radius, 4.5, 4.5)}
         ${getArcPoint(angle, radius, 4.0, 4.0)}
         ${getArcPoint(angle, radius, 5.0, 5.0)}
         ${getArcPoint(angle, radius, 5.3, 5.3)}
         ${getArcPoint(angle, radius, 0.0, 8.8, 0.6)}
         ${getArcPoint(angle, radius, -5.3, 5.3)}
         ${getArcPoint(angle, radius, -5.0, 5.0)}
+        ${getArcPoint(angle, radius, -4.5, 4.5)}
         ${getArcPoint(angle, radius, -4.0, 4.0)}
+        ${getArcPoint(angle, radius, -3.5, 3.5)}
         ${getArcPoint(angle, radius, -3.0, 3.0)}
+        ${getArcPoint(angle, radius, -2.5, 2.5)}
         ${getArcPoint(angle, radius, -2.0, 2.0)}
+        ${getArcPoint(angle, radius, -1.5, 1.5)}
         ${getArcPoint(angle, radius, -1.0, 1.0)}
 
         A ${radius} ${radius} 0 0 0 ${getPoint(angle, radius)}

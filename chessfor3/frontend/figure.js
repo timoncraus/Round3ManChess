@@ -1,8 +1,8 @@
-import { figures_pos, state, moveToCell } from './game_logic.js';
+import { figures_pos, double_pawns, captured_figures, state, moveToCell } from './game_logic.js';
 import { viewBoxDict, board, rings, letters } from './board.js';
 import { overCell, outCell, paintAvailCells } from './cell.js';
 
-const figure_height = 46
+const figureHeight = 46
 
 export function drawAllFigures() {
     const boundBoard = board.getBoundingClientRect();
@@ -34,10 +34,10 @@ function drawFigure(cell, imageUrl, img, boundBoard) {
     figure.style.backgroundSize = 'cover';
     figure.relation = img.naturalWidth / img.naturalHeight;
     figure.setAttribute("class", "figure");
-    figure.widthRelat = parseFloat(board.getAttribute("width")) / viewBoxDict[2];
+    figure.widthRelat = parseFloat(board.getAttribute("width")) / viewBoxDict[2] - 0.1;
     figure.heightRelat = parseFloat(board.getAttribute("height")) / viewBoxDict[3];
-    figure.style.width = figure_height * figure.relation + 'px';
-    figure.style.height = figure_height + 'px';
+    figure.style.width = figureHeight * figure.relation + 'px';
+    figure.style.height = figureHeight + 'px';
 
     figure.centerX = boundBoard.x + boundBoard.width/2;
     figure.centerY = boundBoard.y + boundBoard.height/2;
@@ -76,7 +76,7 @@ function overFigure(figure) {
     figure.style.cursor = 'grab';
 }
 
-function downFigure(figure) {
+export function downFigure(figure) {
     if(!state.someonesDragging) {
         figure.isDragging = true;
         state.someonesDragging = true;
@@ -102,8 +102,7 @@ function moveFigure(e, figure){
     }
 }
 
-function upFigure(figure) {
-    console.log(figures_pos)
+export function upFigure(figure) {
     if(figure.isDragging) {
         figure.isDragging = false;
         state.someonesDragging = false;
@@ -121,7 +120,7 @@ function upFigure(figure) {
             const [char, number] = parseCellId(state.chosenCellId);
             const [prevChar, prevNumber] = parseCellId(figure.cellId);
 
-            removeEnemy(figure, char, number);
+            removeEnemy(figure, player, char, number);
 
             setDoublePawnMark(figure, kind, number, prevNumber);
 
@@ -149,35 +148,40 @@ function upFigure(figure) {
     }
 }
 
-function removeEnemy(figure, char, number) {
+function removeEnemy(figure, player, char, number) {
     const [sideChar, sideNumber] = moveToCell(char, number, -figure.pawnDirection, 0);
     if (figures_pos[state.chosenCellId] !== undefined && figures_pos[state.chosenCellId] !== null) {
         document.querySelectorAll(".figure").forEach(existingFigure => {
             if (existingFigure.cellId === state.chosenCellId) {
-                existingFigure.remove();
+                removeFigure(player, existingFigure);
             }
         });
     }
-    else if(figures_pos[sideChar + sideNumber + "-double-pawn"] === true) {
+    else if(double_pawns[sideChar + sideNumber + "-double-pawn"] === true) {
         document.querySelectorAll(".figure").forEach(existingFigure => {
             if (existingFigure.cellId === sideChar + sideNumber) {
                 figures_pos[sideChar + sideNumber] = null;
-                figures_pos[sideChar + sideNumber + "-double-pawn"] = null;
-                existingFigure.remove();
+                double_pawns[sideChar + sideNumber + "-double-pawn"] = null;
+                removeFigure(player, existingFigure);
             }
         });
     }
+}
+
+function removeFigure(player, existingFigure) {
+    captured_figures[player].push(existingFigure.name);
+    existingFigure.remove();
 }
 
 function setDoublePawnMark(figure, kind, number, prevNumber) {
     if(kind === "pawn" && ( (figure.pawnDirection === 1 && number === 4 && prevNumber === 2) || 
                             (figure.pawnDirection === -1 && number === 9 && prevNumber === 11) )
     ) {
-        figures_pos[state.chosenCellId + "-double-pawn"] = true;
+        double_pawns[state.chosenCellId + "-double-pawn"] = true;
     }
-    else if(figures_pos[state.chosenCellId + "-double-pawn"] !== null && 
-            figures_pos[state.chosenCellId + "-double-pawn"] !== undefined) {
-        figures_pos[state.chosenCellId + "-double-pawn"] = null;
+    else if(double_pawns[state.chosenCellId + "-double-pawn"] !== null && 
+            double_pawns[state.chosenCellId + "-double-pawn"] !== undefined) {
+        double_pawns[state.chosenCellId + "-double-pawn"] = null;
     }
 }
 
@@ -193,18 +197,18 @@ function updateFiguresPos(figure) {
 }
 
 function resetFigurePos(figure) {
-    figure.style.left = figure.style.realLeft;
-    figure.style.top = figure.style.realTop;
+    figure.style.left = figure.style.pinnedLeft;
+    figure.style.top = figure.style.pinnedTop;
     figure.style.zIndex = figure.style.realZIndex;
 }
 
 function setFigure(figure, cell) {
-    figure.style.left = (figure.centerX - figure_height*figure.relation/2 
+    figure.style.left = (figure.centerX - figureHeight*figure.relation/2 
         + parseFloat(cell.getAttribute("x")) * figure.widthRelat) + 'px';
-    figure.style.top = (figure.centerY - figure_height/2 
+    figure.style.top = (figure.centerY - figureHeight/2 
         + parseFloat(cell.getAttribute("y")) * figure.heightRelat) + 'px';
-    figure.style.realLeft = figure.style.left;
-    figure.style.realTop = figure.style.top;
+    figure.style.pinnedLeft = figure.style.left;
+    figure.style.pinnedTop = figure.style.top;
 
     const [char, number] = parseCellId(cell.id);
 
