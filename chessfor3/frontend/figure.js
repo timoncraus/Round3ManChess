@@ -1,13 +1,11 @@
 import { figures_pos, double_pawns, captured_figures, state, moveToCell } from './game_logic.js';
-import { viewBoxDict, board, rings, letters } from './board.js';
+import { viewBoxDict, boardParams, rings, letters } from './board.js';
 import { overCell, outCell, paintAvailCells } from './cell.js';
 import { drawAllMiniFigures } from './mini_figure.js';
 
 const figureHeight = 46
 
 export function drawAllFigures() {
-    const boundBoard = board.getBoundingClientRect();
-
     document.querySelectorAll(".figure").forEach(el => el.remove());
 
     document.querySelectorAll(".cell").forEach(cell => {
@@ -16,7 +14,7 @@ export function drawAllFigures() {
             const img = new Image();
 
             img.onload = function () {
-                drawFigure(cell, imageUrl, img, boundBoard);
+                drawFigure(cell, imageUrl, img);
             }
 
             img.src = imageUrl;
@@ -25,7 +23,7 @@ export function drawAllFigures() {
 }
 
 
-function drawFigure(cell, imageUrl, img, boundBoard) {
+function drawFigure(cell, imageUrl, img) {
     const figure = document.createElement('div');
 
     figure.cellId = cell.id;
@@ -35,15 +33,8 @@ function drawFigure(cell, imageUrl, img, boundBoard) {
     figure.style.backgroundSize = 'cover';
     figure.relation = img.naturalWidth / img.naturalHeight;
     figure.setAttribute("class", "figure");
-    figure.widthRelat = parseFloat(board.getAttribute("width")) / viewBoxDict[2] - 0.1;
-    figure.heightRelat = parseFloat(board.getAttribute("height")) / viewBoxDict[3];
     figure.style.width = figureHeight * figure.relation + 'px';
     figure.style.height = figureHeight + 'px';
-
-    figure.centerX = boundBoard.x + boundBoard.width/2;
-    figure.centerY = boundBoard.y + boundBoard.height/2;
-
-    
     
     setFigure(figure, cell);
 
@@ -205,10 +196,10 @@ function resetFigurePos(figure) {
 }
 
 function setFigure(figure, cell) {
-    figure.style.left = (figure.centerX - figureHeight*figure.relation/2 
-        + parseFloat(cell.getAttribute("x")) * figure.widthRelat) + 'px';
-    figure.style.top = (figure.centerY - figureHeight/2 
-        + parseFloat(cell.getAttribute("y")) * figure.heightRelat) + 'px';
+    figure.style.left = (boardParams.centerX - figureHeight*figure.relation/2 
+        + parseFloat(cell.getAttribute("x")) * boardParams.widthRelat) + 'px';
+    figure.style.top = (boardParams.centerY - figureHeight/2 
+        + parseFloat(cell.getAttribute("y")) * boardParams.heightRelat) + 'px';
     figure.style.pinnedLeft = figure.style.left;
     figure.style.pinnedTop = figure.style.top;
 

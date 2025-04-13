@@ -1,4 +1,4 @@
-import { viewBoxDict, board, outerBorderRadius, angleStep } from './board.js';
+import { viewBoxDict, boardParams, outerBorderRadius, angleStep } from './board.js';
 import { captured_figures } from './game_logic.js';
 import { getX, getY } from './common_math.js';
 
@@ -11,8 +11,6 @@ export function drawAllPlayersMiniFigures() {
 }
 
 export function drawAllMiniFigures(player) {
-    const boundBoard = board.getBoundingClientRect();
-
     document.querySelectorAll(".mini-figure").forEach(miniFigure => {
         if(player === miniFigure.playerCaptured) {
             miniFigure.remove();
@@ -54,7 +52,7 @@ export function drawAllMiniFigures(player) {
             const prevSum = (sum - countList[i])
             const distX = (initialDistX - diffDistX * i);
 
-            drawMiniFigure(imageUrl, img, boundBoard, player,
+            drawMiniFigure(imageUrl, img, player,
                 initialX - (Math.min(length - prevSum, countList[i]) / 2 - (count+1 - prevSum)) * distX, 
                 initialY + diffY * i);
         }
@@ -62,28 +60,23 @@ export function drawAllMiniFigures(player) {
     }
 }
 
-function drawMiniFigure(imageUrl, img, boundBoard, player, shiftX, shiftY) {
+function drawMiniFigure(imageUrl, img, player, shiftX, shiftY) {
 	const miniFigure = document.createElement('div');
     miniFigure.playerCaptured = player;
     miniFigure.style.backgroundImage = `url(${imageUrl})`;
     miniFigure.style.backgroundSize = 'cover';
     miniFigure.relation = img.naturalWidth / img.naturalHeight;
     miniFigure.setAttribute("class", "mini-figure");
-    miniFigure.widthRelat = parseFloat(board.getAttribute("width")) / viewBoxDict[2] - 0.1;
-    miniFigure.heightRelat = parseFloat(board.getAttribute("height")) / viewBoxDict[3];
     miniFigure.style.width = miniFigureHeight * miniFigure.relation + 'px';
     miniFigure.style.height = miniFigureHeight + 'px';
-
-    miniFigure.centerX = boundBoard.x + boundBoard.width/2;
-    miniFigure.centerY = boundBoard.y + boundBoard.height/2;
 
     const x = getX(angleStep * shiftX) * (outerBorderRadius + shiftY);
     const y = getY(angleStep * shiftX) * (outerBorderRadius + shiftY);
 
-    miniFigure.style.left = (miniFigure.centerX - miniFigureHeight*miniFigure.relation/2 
-        + parseFloat(x) * miniFigure.widthRelat) + 'px';
-    miniFigure.style.top = (miniFigure.centerY - miniFigureHeight/2 
-        + parseFloat(y) * miniFigure.heightRelat) + 'px';
+    miniFigure.style.left = (boardParams.centerX - miniFigureHeight*miniFigure.relation/2 
+        + parseFloat(x) * boardParams.widthRelat) + 'px';
+    miniFigure.style.top = (boardParams.centerY - miniFigureHeight/2 
+        + parseFloat(y) * boardParams.heightRelat) + 'px';
 
     document.body.appendChild(miniFigure);
 }

@@ -3,6 +3,7 @@ import { drawCell, drawAllCellBorders } from './cell.js';
 import { drawAllPlayersMiniFigures } from './mini_figure.js';
 
 export const board = document.getElementById("board");
+export let boundBoard = board.getBoundingClientRect();
 export const viewBoxDict = board.getAttribute("viewBox").split(" ").map(Number);
 export const rings = 6;
 export const sectors = 24;
@@ -15,7 +16,19 @@ export const letters = "ABCDEFGHIJKL"
 export const lineColors = ["orange-line", "blue-line", "pink-line", "black-line", 
     "green-line", "maroon-line", "gray-line", "yellow-line"]
 
+export let boardParams = {}
+
+export function updateBoardParams() {
+    boundBoard = board.getBoundingClientRect();
+    boardParams.widthRelat = parseFloat(board.getAttribute("width")) / viewBoxDict[2] - 0.1;
+    boardParams.heightRelat = parseFloat(board.getAttribute("height")) / viewBoxDict[3];
+    boardParams.centerX = boundBoard.x + boundBoard.width/2;
+    boardParams.centerY = boundBoard.y + boundBoard.height/2;
+}
+
 export function drawBoard() {
+    updateBoardParams();
+
     drawLowerPlayerBorder();
     drawAllPlayersCircles();
 
@@ -24,6 +37,18 @@ export function drawBoard() {
     drawOuterBorder();
 
     drawAllPlayersMiniFigures();
+
+    drawTextDisplay();
+}
+
+export function drawTextDisplay() {
+    const textDisplay = document.getElementById("cell-id-display");
+
+    const x = getX(angleStep * 2.8) * (outerBorderRadius + 180);
+    const y = getY(angleStep * 2.8) * (outerBorderRadius + 180);
+
+    textDisplay.style.right = (boardParams.centerX - parseFloat(x) * boardParams.widthRelat) + 'px';
+    textDisplay.style.top = (boardParams.centerY - parseFloat(y) * boardParams.heightRelat) + 'px';
 }
 
 function drawAllPlayersCircles() {

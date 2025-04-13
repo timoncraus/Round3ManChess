@@ -53,7 +53,11 @@ svg {
     position: absolute;
 }
 #cell-id-display {
+    position: absolute;
     user-select: none;
+    font-weight: bold;
+    color: green;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 .stripe {
