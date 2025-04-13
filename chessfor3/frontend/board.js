@@ -1,5 +1,6 @@
 import { getX, getY, toRad } from './common_math.js';
 import { drawCell, drawAllCellBorders } from './cell.js';
+import { drawAllPlayersMiniFigures } from './mini_figure.js';
 
 export const board = document.getElementById("board");
 export const viewBoxDict = board.getAttribute("viewBox").split(" ").map(Number);
@@ -16,52 +17,19 @@ export const lineColors = ["orange-line", "blue-line", "pink-line", "black-line"
 
 export function drawBoard() {
     drawLowerPlayerBorder();
-    drawPlayerCircle(5, "black");
-    drawPlayerCircle(13, "white");
-    drawPlayerCircle(-3, "gray");
+    drawAllPlayersCircles();
 
     drawCenterCircle();
     drawCellsAndArcs();
     drawOuterBorder();
 
-    const miniFigureHeight = 25;
-    const boundBoard = board.getBoundingClientRect();
+    drawAllPlayersMiniFigures();
+}
 
-    const imageUrl = `${images}/pawn-gray.png`;
-    const img = new Image();
-
-    img.onload = function () {
-        const miniFigure = document.createElement('div');
-        miniFigure.style.backgroundImage = `url(${imageUrl})`;
-        miniFigure.style.backgroundSize = 'cover';
-        miniFigure.relation = img.naturalWidth / img.naturalHeight;
-        miniFigure.setAttribute("class", "mini-figure");
-        miniFigure.widthRelat = parseFloat(board.getAttribute("width")) / viewBoxDict[2] - 0.1;
-        miniFigure.heightRelat = parseFloat(board.getAttribute("height")) / viewBoxDict[3];
-        miniFigure.style.width = miniFigureHeight * miniFigure.relation + 'px';
-        miniFigure.style.height = miniFigureHeight + 'px';
-
-        miniFigure.centerX = boundBoard.x + boundBoard.width/2;
-        miniFigure.centerY = boundBoard.y + boundBoard.height/2;
-
-        const x = getX(angleStep * 15) * (outerBorderRadius + 45);
-        const y = getY(angleStep * 15) * (outerBorderRadius + 45);
-
-        miniFigure.style.left = (miniFigure.centerX - miniFigureHeight*miniFigure.relation/2 
-            + parseFloat(x) * miniFigure.widthRelat) + 'px';
-        miniFigure.style.top = (miniFigure.centerY - miniFigureHeight/2 
-            + parseFloat(y) * miniFigure.heightRelat) + 'px';
-
-        document.body.appendChild(miniFigure);
-    }
-
-    img.src = imageUrl;
-
-    
-    
-
-
-    
+function drawAllPlayersCircles() {
+    drawPlayerCircle(5, "black");
+    drawPlayerCircle(13, "white");
+    drawPlayerCircle(-3, "gray");
 }
 
 function drawPlayerCircle(angleK, player) {

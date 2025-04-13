@@ -10,9 +10,9 @@ export let state = {
 const userPlayer = "white";
 
 export let captured_figures = {
+    "black": [],
     "white": [],
-    "gray": [],
-    "black": []
+    "gray": []
 }
 
 export let double_pawns = {}

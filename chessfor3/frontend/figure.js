@@ -1,6 +1,7 @@
 import { figures_pos, double_pawns, captured_figures, state, moveToCell } from './game_logic.js';
 import { viewBoxDict, board, rings, letters } from './board.js';
 import { overCell, outCell, paintAvailCells } from './cell.js';
+import { drawAllMiniFigures } from './mini_figure.js';
 
 const figureHeight = 46
 
@@ -170,6 +171,7 @@ function removeEnemy(figure, player, char, number) {
 
 function removeFigure(player, existingFigure) {
     captured_figures[player].push(existingFigure.name);
+    drawAllMiniFigures(player);
     existingFigure.remove();
 }
 
