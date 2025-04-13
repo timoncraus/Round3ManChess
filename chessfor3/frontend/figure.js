@@ -1,4 +1,4 @@
-import { figures_pos, double_pawns, captured_figures, state, moveToCell } from './game_logic.js';
+import { figures_pos, double_pawns, captured_figures, state, moveToCell, crazy } from './game_logic.js';
 import { viewBoxDict, boardParams, rings, letters } from './board.js';
 import { overCell, outCell, paintAvailCells } from './cell.js';
 import { drawAllMiniFigures } from './mini_figure.js';
@@ -98,7 +98,8 @@ export function upFigure(figure) {
     if(figure.isDragging) {
         figure.isDragging = false;
         state.someonesDragging = false;
-        if (state.chosenCellId === figure.cellId || state.chosenCellId === null) {
+        const chosenCell = document.querySelector("#" + state.chosenCellId);
+        if (state.chosenCellId === figure.cellId || state.chosenCellId === null || (!chosenCell.available && !crazy)) {
             overFigure(figure);
             resetFigurePos(figure);
             paintAvailCells(figure);

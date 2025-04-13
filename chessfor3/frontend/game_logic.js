@@ -9,6 +9,8 @@ export let state = {
 
 const userPlayer = "white";
 
+export const crazy = false;
+
 export let captured_figures = {
     "black": [],
     "white": [],

@@ -125,6 +125,7 @@ export function paintAvailCells(figure) {
             availCell.setAttribute("fill", "green");
         }
         availCell.available = true;
+
     })
 
 }
