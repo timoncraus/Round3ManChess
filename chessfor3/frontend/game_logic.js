@@ -8,8 +8,10 @@ export let state = {
 };
 
 const userPlayer = "white";
+let turn = "white";
+
 export const local = false;
-export const crazy = true;
+export const crazy = false;
 
 export let captured_figures = {
     "black": [],
@@ -112,6 +114,7 @@ export function getAvailCells(figure) {
 }
 
 function getPawnCells(availCells, figure, player, char, number) {
+    //console.log(availCells, figure, player, char, number)
     const forwardId = char + (number + figure.pawnDirection);
     if(figures_pos[forwardId] === null || figures_pos[forwardId] === undefined) {
         availCells.push(forwardId);
@@ -136,15 +139,29 @@ function getPawnCells(availCells, figure, player, char, number) {
 function pushDiagPawnCell(availCells, figure, player, char, number, right) {
     let up = figure.pawnDirection;
     const [sideChar, sideNumber] = moveToCell(char, number, 0, right);
+    let sideFigure = null;
+    for (const someFigure of document.querySelectorAll(".figure")) {
+        if(someFigure.cellId === sideChar + sideNumber) {
+            sideFigure = someFigure;
+            break;
+        }
+    }
+    let sideKind = null;
+    let sidePlayer = null;
+    if(sideFigure !== null) {
+        [sideKind, sidePlayer] = sideFigure.name.split("-");
+    }
+
     const offset = getDiagOffset(right, up);
     const oldChar = char;
     const oldNumber = number;
     [char, number, up] = moveToDiagCell(char, number, up, right, offset);
 
     if(figures_pos[char + number] !== null && figures_pos[char + number] !== undefined ||
-        double_pawns[sideChar + sideNumber + "-double-pawn"] === true) {
+        (double_pawns[sideChar + sideNumber + "-double-pawn"] === true && sidePlayer !== player)) {
         addCheckCell(availCells, figure, player, char, number, oldChar, oldNumber);
     }
+    
 }
 
 export function setPawnDirection(figure, cell) {

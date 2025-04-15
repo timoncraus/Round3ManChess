@@ -1,5 +1,5 @@
 import { drawBoard, updateBoardParams, drawTextDisplay } from './board.js';
-import { drawAllFigures } from './figure.js';
+import { drawAllFigures, downFigure } from './figure.js';
 import { upCell } from './cell.js';
 import { drawAllPlayersMiniFigures } from './mini_figure.js';
 import { state } from './game_logic.js';
@@ -31,7 +31,8 @@ socket.onmessage = function(event) {
   if (data.type === 'move') {
   	for (const figure of document.querySelectorAll(".figure")) {
         if(figure.cellId === data.from_cell_id) {
-			state.clickedFigure = figure;
+        	downFigure(figure);
+			//state.clickedFigure = figure;
 			break;
         }
     }
