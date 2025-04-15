@@ -4,7 +4,7 @@ from django.contrib.auth import login
 from .models import Game
 
 def home(request):
-    games = Game.objects.filter(status='finished').order_by('-ended_at')[:10]
+    games = Game.objects.filter().order_by('-ended_at')
     return render(request, 'home.html', {'games': games})
 
 def register(request):

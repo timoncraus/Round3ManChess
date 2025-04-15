@@ -1,5 +1,5 @@
 import { viewBoxDict, boardParams, outerBorderRadius, angleStep } from './board.js';
-import { captured_figures } from './game_logic.js';
+import { state_game } from './game_logic.js';
 import { getX, getY } from './common_math.js';
 
 const miniFigureHeight = 26;
@@ -16,9 +16,9 @@ export function drawAllMiniFigures(player) {
             miniFigure.remove();
         }
     });
-    const length = captured_figures[player].length;
+    const length = state_game.captured_figures[player].length;
     for(let count = 0; count < length; count++) {
-        const miniFigureName = captured_figures[player][count];
+        const miniFigureName = state_game.captured_figures[player][count];
 
         const imageUrl = `${images}/${miniFigureName}.png`;
         const img = new Image();

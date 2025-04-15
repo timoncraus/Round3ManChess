@@ -1,6 +1,6 @@
 import { getX, getY } from './common_math.js';
 import { board, rings, sectors, letters } from './board.js';
-import { state, getAvailCells } from './game_logic.js';
+import { state_click, getAvailCells } from './game_logic.js';
 import { downFigure, upFigure } from './figure.js';
 
 export function drawCell(ring, sector, innerRadius, outerRadius, startAngle, endAngle) {
@@ -63,11 +63,11 @@ function addCellListeners(cell) {
 }
 
 export function upCell(cell) {
-    if(state.clickedFigure != null) {
-        state.chosenCellId = cell.id;
-        state.clickedFigure.isDragging = true;
-        state.someonesDragging = true;
-        upFigure(state.clickedFigure);
+    if(state_click.clickedFigure != null) {
+        state_click.chosenCellId = cell.id;
+        state_click.clickedFigure.isDragging = true;
+        state_click.someonesDragging = true;
+        upFigure(state_click.clickedFigure);
     }
 }
 
@@ -88,22 +88,22 @@ function drawCellBorder(cell) {
 }
 
 export function overCell(cell) {
-    if(!state.someonesDragging){
+    if(!state_click.someonesDragging){
         cell.setAttribute("fill", "lightgreen");
     }
     else {
-        if(state.chosenCellId !== null) {
-            document.querySelector("#" + state.chosenCellId + "Border").setAttribute("stroke-width", "0");
+        if(state_click.chosenCellId !== null) {
+            document.querySelector("#" + state_click.chosenCellId + "Border").setAttribute("stroke-width", "0");
         }
         document.querySelector("#" + cell.id + "Border").setAttribute("stroke-width", "10");
-        state.chosenCellId = cell.id;
+        state_click.chosenCellId = cell.id;
     }
     document.getElementById("cell-id-display").textContent = "Клетка: " + cell.id;
 }
 
 export function outCell(cell) {
-    if(!state.someonesDragging){
-        if(state.clickedFigure !== null && cell.available) {
+    if(!state_click.someonesDragging){
+        if(state_click.clickedFigure !== null && cell.available) {
             cell.setAttribute("fill", "green");
         }
         else {

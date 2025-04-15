@@ -1,4 +1,4 @@
-import { figures_pos, eliminated_players, setPawnDirection, double_pawns, captured_figures, state, moveToCell, crazy } from './game_logic.js';
+import { state_game, setPawnDirection, state_click, moveToCell } from './game_logic.js';
 import { viewBoxDict, boardParams, rings, letters } from './board.js';
 import { overCell, outCell, paintAvailCells } from './cell.js';
 import { drawAllMiniFigures } from './mini_figure.js';
@@ -10,8 +10,8 @@ export function drawAllFigures() {
     document.querySelectorAll(".figure").forEach(el => el.remove());
 
     document.querySelectorAll(".cell").forEach(cell => {
-        if(figures_pos[cell.id] !== undefined && figures_pos[cell.id] !== null) {
-            const imageUrl = `${images}/${figures_pos[cell.id]}.png`;
+        if(state_game.figures_pos[cell.id] !== undefined && state_game.figures_pos[cell.id] !== null) {
+            const imageUrl = `${images}/${state_game.figures_pos[cell.id]}.png`;
             const img = new Image();
 
             img.onload = function () {
@@ -28,7 +28,7 @@ function drawFigure(cell, imageUrl, img) {
     const figure = document.createElement('div');
 
     figure.cellId = cell.id;
-    figure.name = figures_pos[cell.id];
+    figure.name = state_game.figures_pos[cell.id];
 
     figure.style.backgroundImage = `url(${imageUrl})`;
     figure.style.backgroundSize = 'cover';
@@ -70,9 +70,9 @@ function overFigure(figure) {
 }
 
 export function downFigure(figure) {
-    if(!state.someonesDragging) {
+    if(!state_click.someonesDragging) {
         figure.isDragging = true;
-        state.someonesDragging = true;
+        state_click.someonesDragging = true;
 
         figure.dragOffsetX = figure.offsetWidth / 2;
         figure.dragOffsetY = figure.offsetHeight / 2;
@@ -81,7 +81,7 @@ export function downFigure(figure) {
         figure.style.zIndex = "100";
 
         paintAvailCells(figure);
-        state.clickedFigure = figure;
+        state_click.clickedFigure = figure;
     }
 }
 
@@ -98,22 +98,22 @@ function moveFigure(e, figure){
 export function upFigure(figure) {
     if(figure.isDragging) {
         figure.isDragging = false;
-        state.someonesDragging = false;
-        const chosenCell = document.querySelector("#" + state.chosenCellId);
-        if (state.chosenCellId === figure.cellId || state.chosenCellId === null || (!chosenCell.available && !crazy)) {
+        state_click.someonesDragging = false;
+        const chosenCell = document.querySelector("#" + state_click.chosenCellId);
+        if (state_click.chosenCellId === figure.cellId || state_click.chosenCellId === null || (!chosenCell.available && !state_game.crazy)) {
             overFigure(figure);
             resetFigurePos(figure);
             paintAvailCells(figure);
-            state.clickedFigure = figure;
+            state_click.clickedFigure = figure;
         }
         else {
             // figure.cellId - предыдущая клетка, ее очищаем 
-            // state.chosenCellId - новая клетка, утверждаем на ней фигуру
+            // state_click.chosenCellId - новая клетка, утверждаем на ней фигуру
 
             const [kind, player] = figure.name.split("-");
-            const [char, number] = parseCellId(state.chosenCellId);
+            const [char, number] = parseCellId(state_click.chosenCellId);
             const [prevChar, prevNumber] = parseCellId(figure.cellId);
-            sendMove(state.chosenCellId, figure.cellId);
+            sendMove(state_click.chosenCellId, figure.cellId);
             setDoublePawnMark(figure, kind, number, prevNumber);
 
             removeEnemy(figure, player, char, number);
@@ -132,7 +132,7 @@ export function upFigure(figure) {
         document.querySelectorAll(".cell").forEach(cell => {
             document.querySelector("#" + cell.id + "Border").setAttribute("stroke-width", "0");
         });
-        if(state.clickedFigure === null) {
+        if(state_click.clickedFigure === null) {
             document.querySelectorAll(".cell").forEach(cell => {
                 cell.setAttribute("fill", cell.color);
                 cell.available = false;
@@ -146,25 +146,25 @@ function removeEnemy(figure, player, char, number) {
     
 
     const [sideChar, sideNumber] = moveToCell(char, number, -figure.pawnDirection, 0);
-    if (figures_pos[state.chosenCellId] !== undefined && figures_pos[state.chosenCellId] !== null) {
+    if (state_game.figures_pos[state_click.chosenCellId] !== undefined && state_game.figures_pos[state_click.chosenCellId] !== null) {
         document.querySelectorAll(".figure").forEach(existingFigure => {
-            if (existingFigure.cellId === state.chosenCellId) {
+            if (existingFigure.cellId === state_click.chosenCellId) {
                 const [exKind, exPlayer] = existingFigure.name.split("-");
-                if(player !== exPlayer || crazy) {
+                if(player !== exPlayer || state_game.crazy) {
                     removeFigure(player, existingFigure);
                 }
             }
         });
     }
-    else if(double_pawns[sideChar + sideNumber + "-double-pawn"] === true) {
+    else if(state_game.double_pawns[sideChar + sideNumber + "-double-pawn"] === true) {
         document.querySelectorAll(".figure").forEach(existingFigure => {
             const [exKind, exPlayer] = figure.name.split("-");
             if (existingFigure.cellId === sideChar + sideNumber) {
-                figures_pos[sideChar + sideNumber] = null;
-                double_pawns[sideChar + sideNumber + "-double-pawn"] = null;
+                state_game.figures_pos[sideChar + sideNumber] = null;
+                state_game.double_pawns[sideChar + sideNumber + "-double-pawn"] = null;
 
                 const [exKind, exPlayer] = existingFigure.name.split("-");
-                if(player !== exPlayer || crazy) {
+                if(player !== exPlayer || state_game.crazy) {
                     removeFigure(player, existingFigure);
                 }
             }
@@ -175,9 +175,9 @@ function removeEnemy(figure, player, char, number) {
 function removeFigure(player, existingFigure) {
     const [exKind, exPlayer] = existingFigure.name.split("-");
     if(exKind == "king") {
-        eliminated_players[exPlayer] = true;
+        state_game.eliminated_players[exPlayer] = true;
     }
-    captured_figures[player].push(existingFigure.name);
+    state_game.captured_figures[player].push(existingFigure.name);
     drawAllMiniFigures(player);
     existingFigure.remove();
 }
@@ -186,24 +186,24 @@ function setDoublePawnMark(figure, kind, number, prevNumber) {
     if(kind === "pawn") {
         if( (figure.pawnDirection === 1 && number === 4 && prevNumber === 2) || 
                                 (figure.pawnDirection === -1 && number === 9 && prevNumber === 11) ) {
-            double_pawns[state.chosenCellId + "-double-pawn"] = true;
+            state_game.double_pawns[state_click.chosenCellId + "-double-pawn"] = true;
         }
-        else if(double_pawns[state.chosenCellId + "-double-pawn"] === true) {
-            double_pawns[state.chosenCellId + "-double-pawn"] = null;
+        else if(state_game.double_pawns[state_click.chosenCellId + "-double-pawn"] === true) {
+            state_game.double_pawns[state_click.chosenCellId + "-double-pawn"] = null;
         }
     }
     
 }
 
 function updateFiguresPos(figure) {
-    figures_pos[state.chosenCellId] = figure.name;
-    figures_pos[figure.cellId] = null;
-    figure.cellId = state.chosenCellId;
-    const cell = document.querySelector("#" + state.chosenCellId);
+    state_game.figures_pos[state_click.chosenCellId] = figure.name;
+    state_game.figures_pos[figure.cellId] = null;
+    figure.cellId = state_click.chosenCellId;
+    const cell = document.querySelector("#" + state_click.chosenCellId);
     setFigure(figure, cell);
 
-    state.chosenCellId = null;
-    state.clickedFigure = null;
+    state_click.chosenCellId = null;
+    state_click.clickedFigure = null;
 }
 
 function resetFigurePos(figure) {

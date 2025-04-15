@@ -2,7 +2,7 @@ import { drawBoard, updateBoardParams, drawTextDisplay } from './board.js';
 import { drawAllFigures, downFigure } from './figure.js';
 import { upCell } from './cell.js';
 import { drawAllPlayersMiniFigures } from './mini_figure.js';
-import { state } from './game_logic.js';
+import { state_click } from './game_logic.js';
 
 drawBoard();
 
@@ -29,13 +29,12 @@ export function sendMove(to_cell_id, from_cell_id) {
 socket.onmessage = function(event) {
   const data = JSON.parse(event.data);
   if (data.type === 'move') {
-  	for (const figure of document.querySelectorAll(".figure")) {
-        if(figure.cellId === data.from_cell_id) {
-        	downFigure(figure);
-			//state.clickedFigure = figure;
+	for (const figure of document.querySelectorAll(".figure")) {
+	    if(figure.cellId === data.from_cell_id) {
+	    	downFigure(figure);
 			break;
-        }
-    }
-    upCell(document.querySelector("#" + data.to_cell_id));
+	    }
+	}
+	upCell(document.querySelector("#" + data.to_cell_id));
   }
 };

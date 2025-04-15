@@ -1,6 +1,7 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import sync_to_async
+from pathlib import Path
 from .models import Game
 
 class LobbyConsumer(AsyncWebsocketConsumer):
@@ -12,12 +13,16 @@ class LobbyConsumer(AsyncWebsocketConsumer):
 
         if len(self.players) == 3:
             # создаём игру
-            game = await sync_to_async(Game.objects.create)(status='in_progress')
+            path = Path(__file__).resolve().parents[2] / 'chessfor3/static/json/initial_state_game.json'
+            with open(path, encoding='utf-8') as f:
+                initial_state = json.load(f)
+
+            game = await sync_to_async(Game.objects.create)(status='in_progress', state=initial_state)
             game_id = game.id
             for player in self.players:
                 await player.send(text_data=json.dumps({
                     'action': 'start_game',
-                    'game_id': game_id,
+                    'game_id': game_id
                 }))
             self.players.clear()
 

@@ -1,86 +1,83 @@
 import { rings, sectors, letters } from './board.js';
 import { parseCellId } from './figure.js';
 
-export let state = {
+export let state_click = {
     someonesDragging: false,
     chosenCellId: null,
     clickedFigure: null
 };
 
-const userPlayer = "white";
-let turn = "white";
+export let state_game = {
+    userPlayer: "white",
+    turn: "white",
+    local: false,
+    crazy: false,
+    captured_figures: {
+        "black": [],
+        "white": [],
+        "gray": []
+    },
+    eliminated_players: {
+        "black": false,
+        "white": false,
+        "gray": false
+    },
+    double_pawns: {},
+    figures_pos: {
+        "A1": "rook-white",
+        "B1": "knight-white",
+        "C1": "bishop-white",
+        "D1": "king-white",
+        "E1": "queen-white",
+        "F1": "bishop-white",
+        "G1": "knight-white",
+        "H1": "rook-white",
 
-export const local = false;
-export const crazy = false;
+        "A2": "pawn-white",
+        "B2": "pawn-white",
+        "C2": "pawn-white",
+        "D2": "pawn-white",
+        "E2": "pawn-white",
+        "F2": "pawn-white",
+        "G2": "pawn-white",
+        "H2": "pawn-white",
 
-export let captured_figures = {
-    "black": [],
-    "white": [],
-    "gray": []
-}
+        "I1": "rook-black",
+        "J1": "knight-black",
+        "K1": "bishop-black",
+        "L1": "king-black",
+        "A12": "queen-black",
+        "B12": "bishop-black",
+        "C12": "knight-black",
+        "D12": "rook-black",
 
-export let eliminated_players = {
-    "black": false,
-    "white": false,
-    "gray": false
-}
+        "I2": "pawn-black",
+        "J2": "pawn-black",
+        "K2": "pawn-black",
+        "L2": "pawn-black",
+        "A11": "pawn-black",
+        "B11": "pawn-black",
+        "C11": "pawn-black",
+        "D11": "pawn-black",
 
-export let double_pawns = {}
+        "E12": "rook-gray",
+        "F12": "knight-gray",
+        "G12": "bishop-gray",
+        "H12": "king-gray",
+        "I12": "queen-gray",
+        "J12": "bishop-gray",
+        "K12": "knight-gray",
+        "L12": "rook-gray",
 
-export let figures_pos = {
-    "A1": "rook-white",
-    "B1": "knight-white",
-    "C1": "bishop-white",
-    "D1": "king-white",
-    "E1": "queen-white",
-    "F1": "bishop-white",
-    "G1": "knight-white",
-    "H1": "rook-white",
-
-    "A2": "pawn-white",
-    "B2": "pawn-white",
-    "C2": "pawn-white",
-    "D2": "pawn-white",
-    "E2": "pawn-white",
-    "F2": "pawn-white",
-    "G2": "pawn-white",
-    "H2": "pawn-white",
-
-    "I1": "rook-black",
-    "J1": "knight-black",
-    "K1": "bishop-black",
-    "L1": "king-black",
-    "A12": "queen-black",
-    "B12": "bishop-black",
-    "C12": "knight-black",
-    "D12": "rook-black",
-
-    "I2": "pawn-black",
-    "J2": "pawn-black",
-    "K2": "pawn-black",
-    "L2": "pawn-black",
-    "A11": "pawn-black",
-    "B11": "pawn-black",
-    "C11": "pawn-black",
-    "D11": "pawn-black",
-
-    "E12": "rook-gray",
-    "F12": "knight-gray",
-    "G12": "bishop-gray",
-    "H12": "king-gray",
-    "I12": "queen-gray",
-    "J12": "bishop-gray",
-    "K12": "knight-gray",
-    "L12": "rook-gray",
-
-    "E11": "pawn-gray",
-    "F11": "pawn-gray",
-    "G11": "pawn-gray",
-    "H11": "pawn-gray",
-    "I11": "pawn-gray",
-    "J11": "pawn-gray",
-    "K11": "pawn-gray",
-    "L11": "pawn-gray",
+        "E11": "pawn-gray",
+        "F11": "pawn-gray",
+        "G11": "pawn-gray",
+        "H11": "pawn-gray",
+        "I11": "pawn-gray",
+        "J11": "pawn-gray",
+        "K11": "pawn-gray",
+        "L11": "pawn-gray",
+    }
 }
 
 export function getAvailCells(figure) {
@@ -116,12 +113,12 @@ export function getAvailCells(figure) {
 function getPawnCells(availCells, figure, player, char, number) {
     //console.log(availCells, figure, player, char, number)
     const forwardId = char + (number + figure.pawnDirection);
-    if(figures_pos[forwardId] === null || figures_pos[forwardId] === undefined) {
+    if(state_game.figures_pos[forwardId] === null || state_game.figures_pos[forwardId] === undefined) {
         availCells.push(forwardId);
     }
 
     const doubleForwardId = char + (number + figure.pawnDirection * 2);
-    if( (figures_pos[doubleForwardId] === null || figures_pos[doubleForwardId] === undefined) &&
+    if( (state_game.figures_pos[doubleForwardId] === null || state_game.figures_pos[doubleForwardId] === undefined) &&
         ((figure.pawnDirection === 1 && number === 2) ||
             (figure.pawnDirection === -1 && number === 11)) ) {
         availCells.push(doubleForwardId);
@@ -157,8 +154,8 @@ function pushDiagPawnCell(availCells, figure, player, char, number, right) {
     const oldNumber = number;
     [char, number, up] = moveToDiagCell(char, number, up, right, offset);
 
-    if(figures_pos[char + number] !== null && figures_pos[char + number] !== undefined ||
-        (double_pawns[sideChar + sideNumber + "-double-pawn"] === true && sidePlayer !== player)) {
+    if(state_game.figures_pos[char + number] !== null && state_game.figures_pos[char + number] !== undefined ||
+        (state_game.double_pawns[sideChar + sideNumber + "-double-pawn"] === true && sidePlayer !== player)) {
         addCheckCell(availCells, figure, player, char, number, oldChar, oldNumber);
     }
     
@@ -381,11 +378,11 @@ function addCheckCell(availCells, figure, player, char, number, oldChar, oldNumb
     }
     const newCellId = char + number;
     
-    if(figures_pos[newCellId] === null || figures_pos[newCellId] === undefined) {
+    if(state_game.figures_pos[newCellId] === null || state_game.figures_pos[newCellId] === undefined) {
         availCells.push(newCellId);
         return true;
     }
-    const [otherKind, otherPlayer] = figures_pos[newCellId].split("-");
+    const [otherKind, otherPlayer] = state_game.figures_pos[newCellId].split("-");
     if(otherPlayer === player) {
         return false;
     }
@@ -404,8 +401,8 @@ function checkThickStripes(figure, char, number, oldChar, oldNumber) {
     if(toTerritoryPlayer === null) return true;
     if(toTerritoryPlayer === player) return true;
 
-    if(eliminated_players[toTerritoryPlayer]) return true;
-    if(figures_pos[char + number] === null || figures_pos[char + number] === undefined) return true;
+    if(state_game.eliminated_players[toTerritoryPlayer]) return true;
+    if(state_game.figures_pos[char + number] === null || state_game.figures_pos[char + number] === undefined) return true;
 
     if(kind === "rook" || kind === "queen") {
         const fromTerritoryPlayer = getTerritoryPlayer(oldChar, oldNumber, 0);
