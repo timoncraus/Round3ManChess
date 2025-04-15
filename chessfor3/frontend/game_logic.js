@@ -8,13 +8,19 @@ export let state = {
 };
 
 const userPlayer = "white";
-
-export const crazy = false;
+export const local = false;
+export const crazy = true;
 
 export let captured_figures = {
     "black": [],
     "white": [],
     "gray": []
+}
+
+export let eliminated_players = {
+    "black": false,
+    "white": false,
+    "gray": false
 }
 
 export let double_pawns = {}
@@ -131,11 +137,49 @@ function pushDiagPawnCell(availCells, figure, player, char, number, right) {
     let up = figure.pawnDirection;
     const [sideChar, sideNumber] = moveToCell(char, number, 0, right);
     const offset = getDiagOffset(right, up);
+    const oldChar = char;
+    const oldNumber = number;
     [char, number, up] = moveToDiagCell(char, number, up, right, offset);
 
     if(figures_pos[char + number] !== null && figures_pos[char + number] !== undefined ||
         double_pawns[sideChar + sideNumber + "-double-pawn"] === true) {
-        addCheckCell(availCells, player, char, number);
+        addCheckCell(availCells, figure, player, char, number, oldChar, oldNumber);
+    }
+}
+
+export function setPawnDirection(figure, cell) {
+    const [kind, player] = figure.name.split("-");
+    const [char, number] = parseCellId(cell.id);
+
+    if(kind === "pawn") {
+        if(player === "white") {
+            if(number <= 6 && "ABCDEFGHIJ".includes(char) 
+                    || number >= 7 && !"KL".includes(char)) {
+                figure.pawnDirection = 1;
+            }
+            else {
+                figure.pawnDirection = -1;
+            }
+        }
+
+        if(player === "gray") {
+            if(number >= 7 && "CDEFGHIJKL".includes(char) 
+                    || number <= 6 && !"AB".includes(char)) {
+                figure.pawnDirection = -1;
+            }
+            else {
+                figure.pawnDirection = 1;
+            }
+        }
+        if(player === "black") {
+            if(number <= 6 && "GHIJKL".includes(char) 
+                    || number >= 7 && !"ABCDEF".includes(char) ) {
+                figure.pawnDirection = 1;
+            }
+            else {
+                figure.pawnDirection = -1;
+            }
+        }
     }
 }
 
@@ -149,11 +193,14 @@ function getBihshopCells(availCells, figure, player, char, number) {
 
 function pushInfinityDiagCells(availCells, figure, player, char, number, up, right) {
     const offset = getDiagOffset(right, up);
+    const oldChar = char;
+    const oldNumber = number;
 
     while(true) {
+        
         [char, number, up] = moveToDiagCell(char, number, up, right, offset);
         
-        if(addCheckCell(availCells, player, char, number)) {
+        if(addCheckCell(availCells, figure, player, char, number, oldChar, oldNumber)) {
             continue;
         }
         else {
@@ -204,15 +251,21 @@ function getRookCells(availCells, figure, player, char, number) {
 }
 
 function pushCell(availCells, figure, player, char, number, up, right) {
+    const oldChar = char;
+    const oldNumber = number;
     [char, number] = moveToCell(char, number, up, right);
-    addCheckCell(availCells, player, char, number);
+    addCheckCell(availCells, figure, player, char, number, oldChar, oldNumber);
 }
 
 function pushInfinityCells(availCells, figure, player, char, number, up, right) {
+    const oldChar = char;
+    const oldNumber = number;
+
     while(true) {
+        
         [char, number] = moveToCell(char, number, up, right);
         
-        if(addCheckCell(availCells, player, char, number)) {
+        if(addCheckCell(availCells, figure, player, char, number, oldChar, oldNumber)) {
             continue;
         }
         else {
@@ -250,8 +303,10 @@ export function moveToCell(char, number, up, right) {
 
 function pushDiagCell(availCells, figure, player, char, number, up, right) {
     const offset = getDiagOffset(right, up);
+    const oldChar = char;
+    const oldNumber = number;
     [char, number, up] = moveToDiagCell(char, number, up, right, offset);
-    addCheckCell(availCells, player, char, number)
+    addCheckCell(availCells, figure, player, char, number, oldChar, oldNumber)
     return availCells;
 }
 
@@ -303,8 +358,8 @@ function getDiagOffset(right, up) {
     return 10;
 }
 
-function addCheckCell(availCells, player, char, number) {
-    if(number < 1 || number > 12) {
+function addCheckCell(availCells, figure, player, char, number, oldChar, oldNumber) {
+    if(number < 1 || number > 12 || !checkThickStripes(figure, char, number, oldChar, oldNumber)) {
         return false;
     }
     const newCellId = char + number;
@@ -321,4 +376,52 @@ function addCheckCell(availCells, player, char, number) {
         availCells.push(newCellId);
         return false;
     }
+}
+
+function checkThickStripes(figure, char, number, oldChar, oldNumber) {
+    const [kind, player] = figure.name.split("-");
+
+    const toTerritoryPlayer = getTerritoryPlayer(char, number, 0);
+    
+    
+    if(toTerritoryPlayer === null) return true;
+    if(toTerritoryPlayer === player) return true;
+
+    if(eliminated_players[toTerritoryPlayer]) return true;
+    if(figures_pos[char + number] === null || figures_pos[char + number] === undefined) return true;
+
+    if(kind === "rook" || kind === "queen") {
+        const fromTerritoryPlayer = getTerritoryPlayer(oldChar, oldNumber, 0);
+        if(fromTerritoryPlayer === null || toTerritoryPlayer === null || fromTerritoryPlayer === toTerritoryPlayer) {
+            console.log(kind, toTerritoryPlayer, char, number, fromTerritoryPlayer, oldChar, oldNumber)
+            return true;
+        }
+        return false;
+    }
+    else if(kind === "knight") {
+        const fromTerritoryPlayer2 = getTerritoryPlayer(oldChar, oldNumber, 1);
+        const fromTerritoryPlayer3 = getTerritoryPlayer(oldChar, oldNumber, 2);
+        console.log(kind, fromTerritoryPlayer2, fromTerritoryPlayer3, toTerritoryPlayer, char, number)
+        if( (fromTerritoryPlayer2 === null && fromTerritoryPlayer3 === null) || 
+                toTerritoryPlayer === null || fromTerritoryPlayer2 === toTerritoryPlayer) {
+            return true;
+        }
+        return false;
+
+    }
+    
+    return true;
+}
+
+function getTerritoryPlayer(char, number, line=0) {
+    if(number === (1 + line) && "ABCDEFGH".includes(char)) {
+        return "white";
+    }
+    if(number === (12 - line) && "EFGHIJKL".includes(char)) {
+        return "gray";
+    }
+    if(number === (1 + line) && "IJKL".includes(char) || number === (12 - line) && "ABCD".includes(char)) {
+        return "black";
+    }
+    return null
 }

@@ -1,4 +1,4 @@
-import { figures_pos, double_pawns, captured_figures, state, moveToCell, crazy } from './game_logic.js';
+import { figures_pos, setPawnDirection, double_pawns, captured_figures, state, moveToCell, crazy } from './game_logic.js';
 import { viewBoxDict, boardParams, rings, letters } from './board.js';
 import { overCell, outCell, paintAvailCells } from './cell.js';
 import { drawAllMiniFigures } from './mini_figure.js';
@@ -218,42 +218,6 @@ function setFigure(figure, cell) {
     figure.isDragging = false;
 
     setPawnDirection(figure, cell);
-}
-
-function setPawnDirection(figure, cell) {
-    const [kind, player] = figure.name.split("-");
-    const [char, number] = parseCellId(cell.id);
-
-    if(kind === "pawn") {
-        if(player === "white") {
-            if(number <= 6 && "ABCDEFGHIJ".includes(char) 
-                    || player === "white" && number >= 7 && !"KL".includes(char)) {
-                figure.pawnDirection = 1;
-            }
-            else {
-                figure.pawnDirection = -1;
-            }
-        }
-
-        if(player === "gray") {
-            if(number >= 7 && "CDEFGHIJKL".includes(char) 
-                    || number <= 6 && !"AB".includes(char)) {
-                figure.pawnDirection = -1;
-            }
-            else {
-                figure.pawnDirection = 1;
-            }
-        }
-        if(player === "black") {
-            if(number <= 6 && "GHIJKL".includes(char) 
-                    || number >= 7 && !"ABCDEF".includes(char) ) {
-                figure.pawnDirection = 1;
-            }
-            else {
-                figure.pawnDirection = -1;
-            }
-        }
-    }
 }
 
 export function parseCellId(cellId) {
