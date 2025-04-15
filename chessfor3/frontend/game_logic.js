@@ -393,7 +393,6 @@ function checkThickStripes(figure, char, number, oldChar, oldNumber) {
     if(kind === "rook" || kind === "queen") {
         const fromTerritoryPlayer = getTerritoryPlayer(oldChar, oldNumber, 0);
         if(fromTerritoryPlayer === null || toTerritoryPlayer === null || fromTerritoryPlayer === toTerritoryPlayer) {
-            console.log(kind, toTerritoryPlayer, char, number, fromTerritoryPlayer, oldChar, oldNumber)
             return true;
         }
         return false;
@@ -401,7 +400,6 @@ function checkThickStripes(figure, char, number, oldChar, oldNumber) {
     else if(kind === "knight") {
         const fromTerritoryPlayer2 = getTerritoryPlayer(oldChar, oldNumber, 1);
         const fromTerritoryPlayer3 = getTerritoryPlayer(oldChar, oldNumber, 2);
-        console.log(kind, fromTerritoryPlayer2, fromTerritoryPlayer3, toTerritoryPlayer, char, number)
         if( (fromTerritoryPlayer2 === null && fromTerritoryPlayer3 === null) || 
                 toTerritoryPlayer === null || fromTerritoryPlayer2 === toTerritoryPlayer) {
             return true;

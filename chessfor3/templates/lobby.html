@@ -1,0 +1,10 @@
+<script>
+  const socket = new WebSocket("ws://" + window.location.host + "/ws/lobby/");
+
+  socket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    if (data.action === 'start_game') {
+      window.location.href = `/game/${data.game_id}/`;
+    }
+  };
+</script>

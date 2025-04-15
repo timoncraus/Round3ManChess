@@ -58,13 +58,17 @@ function addCellListeners(cell) {
         outCell(cell);
     });
     cell.addEventListener('mouseup', function() {
-        if(state.clickedFigure != null) {
-            state.chosenCellId = cell.id;
-            state.clickedFigure.isDragging = true;
-            state.someonesDragging = true;
-            upFigure(state.clickedFigure);
-        }
+        upCell(cell);
     });
+}
+
+export function upCell(cell) {
+    if(state.clickedFigure != null) {
+        state.chosenCellId = cell.id;
+        state.clickedFigure.isDragging = true;
+        state.someonesDragging = true;
+        upFigure(state.clickedFigure);
+    }
 }
 
 export function drawAllCellBorders() {

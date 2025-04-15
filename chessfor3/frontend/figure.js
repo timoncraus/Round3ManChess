@@ -2,6 +2,7 @@ import { figures_pos, setPawnDirection, double_pawns, captured_figures, state, m
 import { viewBoxDict, boardParams, rings, letters } from './board.js';
 import { overCell, outCell, paintAvailCells } from './cell.js';
 import { drawAllMiniFigures } from './mini_figure.js';
+import { sendMove } from './index.js';
 
 const figureHeight = 46
 
@@ -112,6 +113,7 @@ export function upFigure(figure) {
             const [kind, player] = figure.name.split("-");
             const [char, number] = parseCellId(state.chosenCellId);
             const [prevChar, prevNumber] = parseCellId(figure.cellId);
+            sendMove(state.chosenCellId, figure.cellId);
 
             removeEnemy(figure, player, char, number);
 
@@ -162,6 +164,10 @@ function removeEnemy(figure, player, char, number) {
 }
 
 function removeFigure(player, existingFigure) {
+    const [exKind, exPlayer] = existingFigure.name.split("-");
+    if(exKind == "king") {
+        eliminated_players[exPlayer] = true;
+    }
     captured_figures[player].push(existingFigure.name);
     drawAllMiniFigures(player);
     existingFigure.remove();

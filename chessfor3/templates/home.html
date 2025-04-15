@@ -1,0 +1,13 @@
+<h1>Завершённые игры</h1>
+<table>
+  <tr><th>Победитель</th><th>Длительность</th><th>Когда завершена</th></tr>
+  {% for game in games %}
+    <tr>
+      <td>{{ game.winner.username }}</td>
+      <td>{{ game.duration }}</td>
+      <td>{{ game.ended_at }}</td>
+    </tr>
+  {% endfor %}
+</table>
+
+<button onclick="window.location.href='{% url 'lobby' %}'">Играть</button>
