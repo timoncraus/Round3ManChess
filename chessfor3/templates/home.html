@@ -1,13 +1,43 @@
-<h1>Завершённые игры</h1>
-<table>
-  <tr><th>Победитель</th><th>Длительность</th><th>Когда завершена</th></tr>
-  {% for game in games %}
-    <tr>
-      <td>{{ game.winner.username }}</td>
-      <td>{{ game.duration }}</td>
-      <td>{{ game.ended_at }}</td>
-    </tr>
-  {% endfor %}
-</table>
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Шахматы на троих — Игры</title>
+  <link rel="stylesheet" href="{% static 'css/home.css' %}" />
+</head>
+<body>
 
-<button onclick="window.location.href='{% url 'lobby' %}'">Играть</button>
+  <h1>Круглые шахматы на троих</h1>
+  <div style="display: flex; justify-content: center;">
+    <div style="display: flex; justify-content: center; width: 60%; gap: 10px;">
+      <button class="btn-play" onclick="window.location.href='{% url 'lobby' %}'">Играть</button>
+      <button class="btn-play btn-sandbox" onclick="window.location.href='{% url 'sandbox' %}'">Песочница (локально)</button>
+      <button class="btn-play btn-sandbox-crazy" onclick="window.location.href='{% url 'sandbox_crazy' %}'">Песочница без правил</button>
+    </div>
+  </div>
+  
+
+  <h2>История игр</h2>
+
+  <table>
+    <tr>
+      <th>Статус</th>
+      <th>Создана</th>
+      <th>Закончена</th>
+      <th>Длительность</th>
+      <th>Действие</th>
+    </tr>
+    {% for game in games %}
+    <tr>
+      <td>{{ game.get_status_display }}</td>
+      <td>{{ game.created_at|date:"d.m.Y H:i" }}</td>
+      <td>{% if game.ended_at %}{{ game.ended_at|date:"d.m.Y H:i" }}{% else %}—{% endif %}</td>
+      <td>{% if game.duration %}{{ game.duration }}{% else %}—{% endif %}</td>
+      <td><button class="btn-watch" onclick="window.location.href='/game/{{ game.id }}/'">Наблюдать</button></td>
+    </tr>
+    {% endfor %}
+  </table>
+
+</body>
+</html>

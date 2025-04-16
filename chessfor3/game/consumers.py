@@ -4,6 +4,7 @@ from channels.db import sync_to_async
 from pathlib import Path
 from .models import Game
 import random
+from django.utils import timezone
 
 class LobbyConsumer(AsyncWebsocketConsumer):
     players = []
@@ -68,13 +69,22 @@ class GameConsumer(AsyncWebsocketConsumer):
             state_dict['eliminated_players'] = data['eliminated_players']
             state_dict['double_pawns'] = data['double_pawns']
 
-            if state_dict['eliminated_players'][state_dict['turn']]:
-                if state_dict['turn'] == "white":
-                    state_dict['turn'] = "gray"
-                elif state_dict['turn'] == "gray":
-                    state_dict['turn'] = "black"
-                elif state_dict['turn'] == "black":
-                    state_dict['turn'] = "white"
+            eliminated = state_dict['eliminated_players']
+            eliminated_count = sum(1 for status in eliminated.values() if status)
+            print(eliminated_count)
+            if eliminated_count == 2:
+                game.status = 'finished'
+                game.ended_at = timezone.now()
+                start_time = game.created_at
+                game.duration = game.ended_at - start_time
+            else:
+                if state_dict['eliminated_players'][state_dict['turn']]:
+                    if state_dict['turn'] == "white":
+                        state_dict['turn'] = "gray"
+                    elif state_dict['turn'] == "gray":
+                        state_dict['turn'] = "black"
+                    elif state_dict['turn'] == "black":
+                        state_dict['turn'] = "white"
 
             game.state = json.dumps(state_dict)
             await sync_to_async(game.save)()

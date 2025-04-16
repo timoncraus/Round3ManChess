@@ -25,3 +25,11 @@ def lobby(request):
 def game_room(request, game_id):
     game = Game.objects.get(id=game_id)
     return render(request, 'game/index.html', {'game_id': game.id, 'game_state_json': json.dumps(game.state)})
+
+def sandbox(request):
+    game = Game.objects.get(id=1)
+    return render(request, 'game/index.html', {'game_id': game.id, 'game_state_json': json.dumps(game.state)})
+
+def sandbox_crazy(request):
+    game = Game.objects.get(id=1)
+    return render(request, 'game/index.html', {'game_id': game.id, 'game_state_json': json.dumps(game.state)})

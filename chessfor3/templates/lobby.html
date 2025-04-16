@@ -1,14 +1,28 @@
-<h1>Ждем еще 2 игрока для игры</h1>
-<script>
-  const socket = new WebSocket("ws://" + window.location.host + "/ws/lobby/");
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Лобби — Шахматы на троих</title>
+  <link rel="stylesheet" href="{% static 'css/lobby.css' %}" />
+</head>
+<body>
+  <div class="lobby-container">
+    <h1>Ожидаем еще 2 игрока для начала партии</h1>
+    <div class="waiting-circle"></div>
+    <div class="player-count">Вы присоединились. Пожалуйста, подождите других.</div>
+  </div>
 
-  socket.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-    console.log(data.color)
-    if (data.action === 'start_game') {
-      window.location.href = `/game/${data.game_id}/`;
-    }
-    sessionStorage.setItem('player_color', data.color);
+  <script>
+    const socket = new WebSocket("ws://" + window.location.host + "/ws/lobby/");
 
-  };
-</script>
+    socket.onmessage = function(event) {
+      const data = JSON.parse(event.data);
+      if (data.action === 'start_game') {
+        sessionStorage.setItem('player_color', data.color);
+        window.location.href = `/game/${data.game_id}/`;
+      }
+    };
+  </script>
+</body>
+</html>
