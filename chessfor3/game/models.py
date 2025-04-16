@@ -11,7 +11,6 @@ class Game(models.Model):
         ('in_progress', 'Идет игра'),
         ('finished', 'Закончена')
     ])
-    players = models.ManyToManyField(User, related_name='games')
     state = models.TextField(default="{}")
 
     def __str__(self):

@@ -1,6 +1,6 @@
-import { setPawnDirection, state_click, moveToCell } from './game_logic.js';
+import { setPawnDirection, state_click, moveToCell, playerColor, changeTurn, checkWinDefeat } from './game_logic.js';
 import { viewBoxDict, boardParams, rings, letters } from './board.js';
-import { overCell, outCell, paintAvailCells } from './cell.js';
+import { overCell, outCell, upCell, paintAvailCells } from './cell.js';
 import { drawAllMiniFigures } from './mini_figure.js';
 import { sendMove } from './index.js';
 
@@ -95,12 +95,18 @@ function moveFigure(e, figure){
     }
 }
 
-export function upFigure(figure) {
+export function upFigure(figure, other=false) {
     if(figure.isDragging) {
         figure.isDragging = false;
         state_click.someonesDragging = false;
         const chosenCell = document.querySelector("#" + state_click.chosenCellId);
-        if (state_click.chosenCellId === figure.cellId || state_click.chosenCellId === null || (!chosenCell.available && !state_game.crazy)) {
+        const [kind, player] = figure.name.split("-");
+        if (    
+                ( state_click.chosenCellId === figure.cellId || 
+                state_click.chosenCellId === null || 
+                !chosenCell.available && !state_game.crazy ||
+                (player !== playerColor || state_game.turn !== playerColor) && !other )
+            ) {
             overFigure(figure);
             resetFigurePos(figure);
             paintAvailCells(figure);
@@ -114,7 +120,7 @@ export function upFigure(figure) {
             const oldCellId = state_click.chosenCellId;
             const newCellId = figure.cellId;
 
-            const [kind, player] = figure.name.split("-");
+            
             const [char, number] = parseCellId(state_click.chosenCellId);
             const [prevChar, prevNumber] = parseCellId(figure.cellId);
 
@@ -134,6 +140,7 @@ export function upFigure(figure) {
                 edit_new[state_click.chosenCellId] = figure.name;
                 updateFiguresPos(figure);
             }
+            changeTurn();
 
             sendMove(oldCellId, newCellId, clear, edit_new);
             
@@ -184,8 +191,9 @@ function removeEnemy(figure, player, char, number, clear) {
 
 function removeFigure(player, existingFigure) {
     const [exKind, exPlayer] = existingFigure.name.split("-");
-    if(exKind == "king") {
+    if(exKind === "king") {
         state_game.eliminated_players[exPlayer] = true;
+        checkWinDefeat();
     }
     state_game.captured_figures[player].push(existingFigure.name);
     drawAllMiniFigures(player);

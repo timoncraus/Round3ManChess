@@ -2,7 +2,7 @@ import { drawBoard, updateBoardParams, drawTextDisplay } from './board.js';
 import { drawAllFigures, downFigure } from './figure.js';
 import { upCell } from './cell.js';
 import { drawAllPlayersMiniFigures } from './mini_figure.js';
-import { state_click } from './game_logic.js';
+import { state_click, playerColor } from './game_logic.js';
 
 drawBoard();
 
@@ -24,19 +24,31 @@ export function sendMove(to_cell_id, from_cell_id, clear, edit_new) {
     'clear': clear,
     'edit_new': edit_new,
     'to_cell_id': to_cell_id,
-    'from_cell_id': from_cell_id
+    'from_cell_id': from_cell_id,
+    'turn': state_game.turn,
+    'captured_figures': state_game.captured_figures,
+    'eliminated_players': state_game.eliminated_players,
+    'double_pawns': state_game.double_pawns
   }));
 }
 
 socket.onmessage = function(event) {
+  
   const data = JSON.parse(event.data);
   if (data.type === 'move') {
+  	let movedFigure = null;
 	for (const figure of document.querySelectorAll(".figure")) {
 	    if(figure.cellId === data.from_cell_id) {
-	    	downFigure(figure);
+	    	movedFigure = figure;
 			break;
 	    }
 	}
-	upCell(document.querySelector("#" + data.to_cell_id));
+	if(movedFigure !== null) {
+		const [kind, player] = movedFigure.name.split("-");
+		if(player !== playerColor) {
+			downFigure(movedFigure);
+			upCell(document.querySelector("#" + data.to_cell_id), true);
+		}
+	}
   }
 };

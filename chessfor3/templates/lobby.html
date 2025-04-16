@@ -4,8 +4,11 @@
 
   socket.onmessage = function(event) {
     const data = JSON.parse(event.data);
+    console.log(data.color)
     if (data.action === 'start_game') {
       window.location.href = `/game/${data.game_id}/`;
     }
+    sessionStorage.setItem('player_color', data.color);
+
   };
 </script>

@@ -7,6 +7,118 @@ export let state_click = {
     clickedFigure: null
 };
 
+export const playerColor = sessionStorage.getItem('player_color');
+
+const figureHeightDisplay = 60
+
+function drawPlayerDisplay() {
+    const playerDisplay = document.getElementById("player-display");
+    let backgroundImagePlayer = `${images}/king-white.png`;
+    const figurePlayerDisplay = document.getElementById("figure-player-display");
+    if(playerColor === "white") {
+        playerDisplay.textContent = "Вы за белых";
+        backgroundImagePlayer = `${images}/king-white.png`;
+    }
+    else if(playerColor === "black") {
+        playerDisplay.textContent = "Вы за черных";
+        backgroundImagePlayer = `${images}/king-black.png`;
+    }
+    else if(playerColor === "gray") {
+        playerDisplay.textContent = "Вы за серых";
+        backgroundImagePlayer = `${images}/king-gray.png`;
+    }
+    else {
+        playerDisplay.textContent = "Вы наблюдатель";
+        backgroundImagePlayer = `${images}/pawn-white.png`;
+    }
+    const img = new Image();
+
+    img.onload = function () {
+        figurePlayerDisplay.style.backgroundImage = `url(${backgroundImagePlayer})`;
+        figurePlayerDisplay.relation = img.naturalWidth / img.naturalHeight;
+        figurePlayerDisplay.style.backgroundSize = 'cover';
+        figurePlayerDisplay.style.width = figureHeightDisplay * figurePlayerDisplay.relation + 'px';
+        figurePlayerDisplay.style.height = figureHeightDisplay + 'px';
+    }
+    img.src = backgroundImagePlayer;
+}
+drawPlayerDisplay();
+
+function drawTurnDisplay() {
+    const turnDisplay = document.getElementById("turn-display");
+    let backgroundImageTurn = `${images}/king-white.png`;
+    const figureTurnDisplay = document.getElementById("figure-turn-display");
+    if(state_game.turn === "white") {
+        turnDisplay.textContent = "Ход белых";
+        backgroundImageTurn = `${images}/king-white.png`;
+    }
+    else if(state_game.turn === "black") {
+        turnDisplay.textContent = "Ход черных";
+        backgroundImageTurn = `${images}/king-black.png`;
+    }
+    else if(state_game.turn === "gray") {
+        turnDisplay.textContent = "Ход серых";
+        backgroundImageTurn = `${images}/king-gray.png`;
+    }
+    else {
+        turnDisplay.textContent = "Непонятно, чей ход";
+        backgroundImageTurn = `${images}/pawn-white.png`;
+    }
+    const img = new Image();
+
+    img.onload = function () {
+        figureTurnDisplay.style.backgroundImage = `url(${backgroundImageTurn})`;
+        figureTurnDisplay.relation = img.naturalWidth / img.naturalHeight;
+        figureTurnDisplay.style.backgroundSize = 'cover';
+        figureTurnDisplay.style.width = figureHeightDisplay * figureTurnDisplay.relation + 'px';
+        figureTurnDisplay.style.height = figureHeightDisplay + 'px';
+    }
+    img.src = backgroundImageTurn;
+}
+drawTurnDisplay();
+
+export function changeTurn() {
+    if(state_game.turn === "white") {
+        state_game.turn = "gray";
+    }
+    else if(state_game.turn === "gray") {
+        state_game.turn = "black";
+    }
+    else if(state_game.turn === "black") {
+        state_game.turn = "white";
+    }
+    if(state_game.eliminated_players[state_game.turn] === true) {
+        changeTurn();
+    }
+    drawTurnDisplay();
+}
+
+export function checkWinDefeat() {
+    const winDisplay = document.getElementById("win-display");
+    const defeatDisplay = document.getElementById("defeat-display");
+    if(state_game.eliminated_players[playerColor]) {
+        // Поражение
+        winDisplay.style.display = "none";
+        defeatDisplay.style.display = "block";
+    }
+    else {
+        const otherColors = Object.keys(state_game.eliminated_players).filter(color => color !== playerColor);
+        const othersEliminated = otherColors.every(color => state_game.eliminated_players[color]);
+
+        if (othersEliminated) {
+            // Ты остался один — победа
+            winDisplay.style.display = "block";
+            defeatDisplay.style.display = "none";
+        } else {
+            // Игра продолжается
+            winDisplay.style.display = "none";
+            defeatDisplay.style.display = "none";
+        }
+    }
+}
+checkWinDefeat();
+
+
 export function getAvailCells(figure) {
     const [kind, player] = figure.name.split("-");
     const [char, number] = parseCellId(figure.cellId);
@@ -45,7 +157,8 @@ function getPawnCells(availCells, figure, player, char, number) {
     }
 
     const doubleForwardId = char + (number + figure.pawnDirection * 2);
-    if( (state_game.figures_pos[doubleForwardId] === null || state_game.figures_pos[doubleForwardId] === undefined) &&
+    if( (state_game.figures_pos[forwardId] === null || state_game.figures_pos[forwardId] === undefined) &&
+        (state_game.figures_pos[doubleForwardId] === null || state_game.figures_pos[doubleForwardId] === undefined) &&
         ((figure.pawnDirection === 1 && number === 2) ||
             (figure.pawnDirection === -1 && number === 11)) ) {
         availCells.push(doubleForwardId);

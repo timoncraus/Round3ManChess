@@ -62,12 +62,12 @@ function addCellListeners(cell) {
     });
 }
 
-export function upCell(cell) {
+export function upCell(cell, other=false) {
     if(state_click.clickedFigure != null) {
         state_click.chosenCellId = cell.id;
         state_click.clickedFigure.isDragging = true;
         state_click.someonesDragging = true;
-        upFigure(state_click.clickedFigure);
+        upFigure(state_click.clickedFigure, other);
     }
 }
 
