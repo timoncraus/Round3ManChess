@@ -26,7 +26,21 @@
 
     <script>
         const images = "{% static 'images' %}";
-        let state_game = JSON.parse(JSON.parse("{{ game_state_json|escapejs }}"));
+        const gameId = document.getElementById('game').dataset.gameId;
+        let state_game;
+        if(gameId === "sandbox") {
+            state_game = JSON.parse("{{ game_state_json|escapejs }}");
+            state_game.local = true;
+        }
+        else if(gameId === "sandbox-crazy") {
+            state_game = JSON.parse("{{ game_state_json|escapejs }}");
+            state_game.local = true;
+            state_game.crazy = true;
+        }
+        else {
+            state_game = JSON.parse(JSON.parse("{{ game_state_json|escapejs }}"));
+        }
+        console.log(state_game)
     </script>
     <script src="{% static 'js/bundle.js' %}"></script>
 </body>

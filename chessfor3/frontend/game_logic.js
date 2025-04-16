@@ -44,7 +44,7 @@ function drawPlayerDisplay() {
 }
 drawPlayerDisplay();
 
-function drawTurnDisplay() {
+export function drawTurnDisplay() {
     const turnDisplay = document.getElementById("turn-display");
     let backgroundImageTurn = `${images}/king-white.png`;
     const figureTurnDisplay = document.getElementById("figure-turn-display");

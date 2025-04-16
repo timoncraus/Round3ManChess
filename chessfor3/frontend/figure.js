@@ -1,4 +1,4 @@
-import { setPawnDirection, state_click, moveToCell, playerColor, changeTurn, checkWinDefeat } from './game_logic.js';
+import { setPawnDirection, state_click, moveToCell, playerColor, changeTurn, drawTurnDisplay, checkWinDefeat } from './game_logic.js';
 import { viewBoxDict, boardParams, rings, letters } from './board.js';
 import { overCell, outCell, upCell, paintAvailCells } from './cell.js';
 import { drawAllMiniFigures } from './mini_figure.js';
@@ -71,6 +71,12 @@ function overFigure(figure) {
 
 export function downFigure(figure) {
     if(!state_click.someonesDragging) {
+        if(state_game.crazy) {
+            const [kind, player] = figure.name.split("-");
+            state_game.turn = player;
+            drawTurnDisplay();
+        }
+
         figure.isDragging = true;
         state_click.someonesDragging = true;
 
@@ -105,7 +111,8 @@ export function upFigure(figure, other=false) {
                 ( state_click.chosenCellId === figure.cellId || 
                 state_click.chosenCellId === null || 
                 !chosenCell.available && !state_game.crazy ||
-                (player !== playerColor || state_game.turn !== playerColor) && !other )
+                (player !== playerColor || state_game.turn !== playerColor) && !other && !state_game.local ||
+                state_game.turn !== player  && state_game.local )
             ) {
             overFigure(figure);
             resetFigurePos(figure);
@@ -140,9 +147,13 @@ export function upFigure(figure, other=false) {
                 edit_new[state_click.chosenCellId] = figure.name;
                 updateFiguresPos(figure);
             }
+
             changeTurn();
 
-            sendMove(oldCellId, newCellId, clear, edit_new);
+            if(!state_game.local) {
+                sendMove(oldCellId, newCellId, clear, edit_new);
+            }
+            
             
         }
         figure.style.pointerEvents = 'auto';
