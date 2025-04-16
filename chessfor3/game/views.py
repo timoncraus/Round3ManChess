@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
@@ -23,4 +24,4 @@ def lobby(request):
 
 def game_room(request, game_id):
     game = Game.objects.get(id=game_id)
-    return render(request, 'game/index.html', {'game': game})
+    return render(request, 'game/index.html', {'game_id': game.id, 'game_state_json': json.dumps(game.state)})

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{% static 'css/index.css' %}" />
 </head>
 <body>
-    <div style="display: flex; justify-content: center;" id="game" data-game-id="{{ game.id }}">
+    <div style="display: flex; justify-content: center;" id="game" data-game-id="{{ game_id }}">
         <svg id="board" width="750" height="680" viewBox="-375 -375 750 750"></svg>
     </div>
 
@@ -19,6 +19,7 @@
 
     <script>
         const images = "{% static 'images' %}";
+        let state_game = JSON.parse(JSON.parse("{{ game_state_json|escapejs }}"));
     </script>
     <script src="{% static 'js/bundle.js' %}"></script>
 </body>

@@ -1,4 +1,4 @@
-import { state_game, setPawnDirection, state_click, moveToCell } from './game_logic.js';
+import { setPawnDirection, state_click, moveToCell } from './game_logic.js';
 import { viewBoxDict, boardParams, rings, letters } from './board.js';
 import { overCell, outCell, paintAvailCells } from './cell.js';
 import { drawAllMiniFigures } from './mini_figure.js';

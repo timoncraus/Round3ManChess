@@ -1,5 +1,4 @@
 import { viewBoxDict, boardParams, outerBorderRadius, angleStep } from './board.js';
-import { state_game } from './game_logic.js';
 import { getX, getY } from './common_math.js';
 
 const miniFigureHeight = 26;

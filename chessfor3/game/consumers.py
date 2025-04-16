@@ -10,6 +10,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
         self.players.append(self)
+        print(self.players)
 
         if len(self.players) == 3:
             # создаём игру
@@ -17,7 +18,7 @@ class LobbyConsumer(AsyncWebsocketConsumer):
             with open(path, encoding='utf-8') as f:
                 initial_state = json.load(f)
 
-            game = await sync_to_async(Game.objects.create)(status='in_progress', state=initial_state)
+            game = await sync_to_async(Game.objects.create)(status='in_progress', state=json.dumps(initial_state))
             game_id = game.id
             for player in self.players:
                 await player.send(text_data=json.dumps({
