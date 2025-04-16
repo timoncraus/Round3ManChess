@@ -44,6 +44,20 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         data = json.loads(text_data)
         if data['type'] == 'move':
+            print(data['clear'], data['edit_new'])
+            game = await sync_to_async(Game.objects.get)(id=self.game_id)
+            state_dict = json.loads(game.state)
+
+            for clear_cell in data['clear']:
+                state_dict['figures_pos'].pop(clear_cell)
+
+            for edit_cell, figure_name in data['edit_new'].items():
+                state_dict['figures_pos'][edit_cell] = figure_name
+
+            game.state = json.dumps(state_dict)
+            await sync_to_async(game.save)()
+            
+            
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {

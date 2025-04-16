@@ -18,9 +18,11 @@ window.addEventListener("resize", () => {
 const gameId = document.getElementById('game').dataset.gameId;
 const socket = new WebSocket("ws://" + window.location.host + `/ws/game/${gameId}/`);
 
-export function sendMove(to_cell_id, from_cell_id) {
+export function sendMove(to_cell_id, from_cell_id, clear, edit_new) {
   socket.send(JSON.stringify({
     'type': 'move',
+    'clear': clear,
+    'edit_new': edit_new,
     'to_cell_id': to_cell_id,
     'from_cell_id': from_cell_id
   }));

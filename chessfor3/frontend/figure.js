@@ -109,24 +109,34 @@ export function upFigure(figure) {
         else {
             // figure.cellId - предыдущая клетка, ее очищаем 
             // state_click.chosenCellId - новая клетка, утверждаем на ней фигуру
+            let clear = [];
+            let edit_new = {};
+            const oldCellId = state_click.chosenCellId;
+            const newCellId = figure.cellId;
 
             const [kind, player] = figure.name.split("-");
             const [char, number] = parseCellId(state_click.chosenCellId);
             const [prevChar, prevNumber] = parseCellId(figure.cellId);
-            sendMove(state_click.chosenCellId, figure.cellId);
+
             setDoublePawnMark(figure, kind, number, prevNumber);
 
-            removeEnemy(figure, player, char, number);
-
+            removeEnemy(figure, player, char, number, clear);
 
             if( kind === "pawn" && (number === 12 || number === 1) ) {
                 figure.name = "queen-" + player;
+                clear.push(figure.cellId);
+                edit_new[state_click.chosenCellId] = figure.name;
                 updateFiguresPos(figure);
                 drawAllFigures();
             }
             else {
+                clear.push(figure.cellId);
+                edit_new[state_click.chosenCellId] = figure.name;
                 updateFiguresPos(figure);
             }
+
+            sendMove(oldCellId, newCellId, clear, edit_new);
+            
         }
         figure.style.pointerEvents = 'auto';
         document.querySelectorAll(".cell").forEach(cell => {
@@ -142,15 +152,14 @@ export function upFigure(figure) {
     }
 }
 
-function removeEnemy(figure, player, char, number) {
-    
-
+function removeEnemy(figure, player, char, number, clear) {
     const [sideChar, sideNumber] = moveToCell(char, number, -figure.pawnDirection, 0);
     if (state_game.figures_pos[state_click.chosenCellId] !== undefined && state_game.figures_pos[state_click.chosenCellId] !== null) {
         document.querySelectorAll(".figure").forEach(existingFigure => {
             if (existingFigure.cellId === state_click.chosenCellId) {
                 const [exKind, exPlayer] = existingFigure.name.split("-");
                 if(player !== exPlayer || state_game.crazy) {
+                    clear.push(existingFigure.cellId);
                     removeFigure(player, existingFigure);
                 }
             }
@@ -165,6 +174,7 @@ function removeEnemy(figure, player, char, number) {
 
                 const [exKind, exPlayer] = existingFigure.name.split("-");
                 if(player !== exPlayer || state_game.crazy) {
+                    clear.push(existingFigure.cellId);
                     removeFigure(player, existingFigure);
                 }
             }
