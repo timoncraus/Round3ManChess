@@ -6,7 +6,7 @@ from .models import Game
 from pathlib import Path
 
 def home(request):
-    games = Game.objects.filter().order_by('-ended_at')
+    games = Game.objects.filter().order_by('ended_at')
     return render(request, 'home.html', {'games': games})
 
 def register(request):

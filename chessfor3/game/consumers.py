@@ -23,17 +23,14 @@ class LobbyConsumer(AsyncWebsocketConsumer):
             game = await sync_to_async(Game.objects.create)(status='in_progress', state=json.dumps(initial_state))
             game_id = game.id
 
-            # Случайно распределяем цвета между игроками
             random.shuffle(self.colors)
             for i, player in enumerate(self.players):
                 player_color = self.colors[i]
-                # Отправляем данные конкретному игроку
                 await player.send(text_data=json.dumps({
                     'action': 'start_game',
                     'game_id': game_id,
                     'color': player_color
                 }))
-                print(f"Sent {player_color} to {player}")
 
             self.players.clear()
 

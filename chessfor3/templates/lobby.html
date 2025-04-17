@@ -14,12 +14,13 @@
   </div>
 
   <script>
-    const socket = new WebSocket("ws://" + window.location.host + "/ws/lobby/");
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const socket = new WebSocket(protocol + window.location.host + '/ws/lobby/');
 
     socket.onmessage = function(event) {
       const data = JSON.parse(event.data);
       if (data.action === 'start_game') {
-        sessionStorage.setItem('player_color', data.color);
+        sessionStorage.setItem('player_color' + data.game_id, data.color);
         window.location.href = `/game/${data.game_id}/`;
       }
     };

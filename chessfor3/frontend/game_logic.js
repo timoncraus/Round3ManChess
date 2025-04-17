@@ -7,7 +7,7 @@ export let state_click = {
     clickedFigure: null
 };
 
-export const playerColor = sessionStorage.getItem('player_color');
+export const playerColor = sessionStorage.getItem('player_color' + gameId);
 
 const figureHeightDisplay = 60
 
