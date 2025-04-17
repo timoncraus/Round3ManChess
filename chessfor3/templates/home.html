@@ -7,13 +7,14 @@
   <link rel="stylesheet" href="{% static 'css/home.css' %}" />
 </head>
 <body>
-
+  <button class="about-btn" onclick="toggleModal()">О программе</button>
   <h1>Круглые шахматы на троих</h1>
   <div style="display: flex; justify-content: center;">
     <div style="display: flex; justify-content: center; width: 60%; gap: 10px;">
       <button class="btn-play" onclick="window.location.href='{% url 'lobby' %}'">Играть</button>
       <button class="btn-play btn-sandbox" onclick="window.location.href='{% url 'sandbox' %}'">Песочница (локально)</button>
       <button class="btn-play btn-sandbox-crazy" onclick="window.location.href='{% url 'sandbox_crazy' %}'">Песочница без правил</button>
+      <button class="btn-play btn-rules" onclick="window.location.href='{% url 'rules' %}'">Правила игры</button>
     </div>
   </div>
   
@@ -38,6 +39,32 @@
     </tr>
     {% endfor %}
   </table>
+
+
+  <div id="about-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="toggleModal()">&times;</span>
+      <h2>О программе</h2>
+      <p>Круглые шахматы на троих игроков — это экспериментальная браузерная игра с уникальными механиками и круговым полем. Основана на существующих правилах для игры в шахматы втроем на круглой доске.</p>
+      <p><strong>Версия:</strong> 30
+        <br><strong>Разработчик:</strong>Горшков Тимофей</p>
+    </div>
+  </div>
+
+  <script>
+    function toggleModal() {
+      const modal = document.getElementById('about-modal');
+      modal.style.display = (modal.style.display === "block") ? "none" : "block";
+    }
+
+    // Закрытие при клике вне окна
+    window.onclick = function(event) {
+      const modal = document.getElementById('about-modal');
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    };
+  </script>
 
 </body>
 </html>

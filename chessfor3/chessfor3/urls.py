@@ -11,6 +11,7 @@ urlpatterns = [
     path('game/<int:game_id>/', game_room, name='game_room'),
     path('sandbox/', sandbox, name='sandbox'),
     path('sandbox_crazy/', sandbox_crazy, name='sandbox_crazy'),
+    path('rules/', rules, name='rules'),
 
      # Аутентификация
     path('accounts/login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),

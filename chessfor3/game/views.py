@@ -38,3 +38,6 @@ def sandbox_crazy(request):
     with open(path, encoding='utf-8') as f:
         initial_state = json.load(f)
     return render(request, 'game/index.html', {'game_id': 'sandbox-crazy', 'game_state_json': json.dumps(initial_state)})
+
+def rules(request):
+    return render(request, 'rules.html')
