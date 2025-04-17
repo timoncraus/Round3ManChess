@@ -68,15 +68,15 @@ svg {
     padding: 2px 4px;
     color: white;
     font-size: 260%;
-    left: 6%; 
-    top: 3%;
+    left: 80px; 
+    top: 30px;
     font-family: Arial, Helvetica, sans-serif;
 }
 
 #figure-player-display {
     position: absolute;
-    left: 2%; 
-    top: 2%;
+    left: 30px; 
+    top: 25px;
 }
 
 #turn-display {
@@ -87,15 +87,15 @@ svg {
     padding: 2px 4px;
     color: white;
     font-size: 260%;
-    left: 6%; 
-    top: 16%;
+    left: 80px; 
+    top: 120px;
     font-family: Arial, Helvetica, sans-serif;
 }
 
 #figure-turn-display {
     position: absolute;
-    left: 2%; 
-    top: 15%;
+    left: 20px; 
+    top: 115px;
 }
 
 #win-display {
@@ -122,6 +122,32 @@ svg {
     left: 6%; 
     top: 28%;
     font-family: Arial, Helvetica, sans-serif;
+}
+
+@media (max-width: 1000px) {
+    #win-display {
+        top: 700px;
+    }
+    #defeat-display {
+        top: 700px;
+    }
+    #player-display {
+        top: 800px;
+    }
+    #figure-player-display {
+        top: 790px;
+    }
+    #turn-display {
+        top: 900px;
+    }
+    #figure-turn-display {
+        top: 890px;
+    }
+
+    /* Центрируем блоки под доской */
+    #game + #player-display {
+        margin-top: 20px;
+    }
 }
 
 .stripe {

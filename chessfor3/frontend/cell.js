@@ -53,6 +53,10 @@ function addCellListeners(cell) {
     cell.addEventListener("mouseover", function () {
         overCell(cell);
     });
+
+    cell.addEventListener('mousedown', function () {
+        downCell(cell);
+    });
     
     cell.addEventListener("mouseout", function () {
         outCell(cell);
@@ -62,8 +66,23 @@ function addCellListeners(cell) {
     });
 }
 
+export function downCell(cell) {
+    if(state_click.clickedFigure === null) {
+        let thisFigure = null
+        for (const someFigure of document.querySelectorAll(".figure")) {
+            if(someFigure.cellId === cell.id) {
+                thisFigure = someFigure;
+                break;
+            }
+        }
+        if(thisFigure !== null) {
+            downFigure(thisFigure);
+        }
+    } 
+}
+
 export function upCell(cell, other=false) {
-    if(state_click.clickedFigure != null) {
+    if(state_click.clickedFigure !== null) {
         state_click.chosenCellId = cell.id;
         state_click.clickedFigure.isDragging = true;
         state_click.someonesDragging = true;
@@ -116,12 +135,7 @@ export function outCell(cell) {
 
 
 export function paintAvailCells(figure) {
-    document.querySelectorAll(".cell").forEach(cell => {
-        if(cell.getAttribute("fill") !== "lightgreen") {
-            cell.setAttribute("fill", cell.color);
-        }
-        cell.available = false;
-    })
+    clearAvailCells();
     const availCellIds = getAvailCells(figure);
     availCellIds.forEach(availCellId => {
         const availCell = document.querySelector("#" + availCellId);
@@ -132,4 +146,13 @@ export function paintAvailCells(figure) {
 
     })
 
+}
+
+export function clearAvailCells() {
+    document.querySelectorAll(".cell").forEach(cell => {
+        if(cell.getAttribute("fill") !== "lightgreen") {
+            cell.setAttribute("fill", cell.color);
+        }
+        cell.available = false;
+    })
 }

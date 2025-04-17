@@ -1,6 +1,6 @@
 import { setPawnDirection, state_click, moveToCell, playerColor, changeTurn, drawTurnDisplay, checkWinDefeat } from './game_logic.js';
 import { viewBoxDict, boardParams, rings, letters } from './board.js';
-import { overCell, outCell, upCell, paintAvailCells } from './cell.js';
+import { overCell, outCell, upCell, downCell, paintAvailCells, clearAvailCells } from './cell.js';
 import { drawAllMiniFigures } from './mini_figure.js';
 import { sendMove } from './index.js';
 
@@ -70,9 +70,24 @@ function overFigure(figure) {
 }
 
 export function downFigure(figure) {
+    if(state_click.clickedFigure === figure) {
+        state_click.chosenCellId = null;
+        state_click.clickedFigure = null;
+        clearAvailCells();
+        return;
+    }
+    const [kind, player] = figure.name.split("-");
+    if(state_click.clickedFigure !== null) {
+        if(state_game.turn !== player) { //!state_game.crazy && 
+            state_click.clickedFigure.isDragging = true;
+            state_click.chosenCellId = figure.cellId;
+            upFigure(state_click.clickedFigure)
+            return;
+        }
+    }
     if(!state_click.someonesDragging) {
         if(state_game.crazy) {
-            const [kind, player] = figure.name.split("-");
+            
             state_game.turn = player;
             drawTurnDisplay();
         }
