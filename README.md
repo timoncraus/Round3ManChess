@@ -2,8 +2,6 @@
 
 ![rules5](https://github.com/user-attachments/assets/e31f16e5-da74-4861-a1a1-4f59f1f49092)
 
-![image](https://github.com/user-attachments/assets/6194c4b1-8354-40fe-bbec-df663787dcfb)
-
 Круглые шахматы на троих игроков — это экспериментальная браузерная игра с уникальными механиками и круговым полем. 
 Основана на существующих правилах для игры в шахматы втроем на круглой доске.
 
@@ -18,7 +16,8 @@
 - лобби для ожидания игроков,
 - песочница для локальной игры с одного компьютера,
 - песочница без правил и ограничений для возможности изучения,
-- перемещение фигур с помощью перетаскивания фигуры,
+- перемещение фигур с помощью перетаскивания фигуры либо с помощью клика (клик на фигуру, а затем на клетку - перемещение фигуры на клетку; двойной клик на фигуру - сброс фокуса с фигуры),
+- адаптивность под мобильные устройства
 - захват фигуры,
 - рокировка,
 - взятие на проходе,
@@ -32,6 +31,18 @@
 После этих действий можно зайти через браузер на "http://127.0.0.1:8000/", и вы сможете пользоваться сайтом.
 
 После редактирования JS файлов необходимо запустить "npx webpack" (в папке frontend), либо запустить "npx webpack --watch" единожды перед многократными изменениями.
+
+https://github.com/user-attachments/assets/8727d3d3-4e89-4b0d-b844-91d7cf6c0d25
+
+![image](https://github.com/user-attachments/assets/757fcb91-a524-48d1-9251-29c430473aed)
+
+![image](https://github.com/user-attachments/assets/b7329144-161d-4fc6-9dfa-3a6d8e569cc2)
+
+https://github.com/user-attachments/assets/e2dde21b-09bd-48c9-b693-8ee22a5a233c
+
+![image](https://github.com/user-attachments/assets/6194c4b1-8354-40fe-bbec-df663787dcfb)
+
+![image](https://github.com/user-attachments/assets/2b2edebc-3705-4d8c-b99a-8fbc2c839b89)
 
 ![image](https://github.com/user-attachments/assets/dcc9839a-2a98-453e-8508-5b2a7576f484)
 
