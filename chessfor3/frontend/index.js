@@ -28,7 +28,8 @@ export function sendMove(to_cell_id, from_cell_id, clear, edit_new) {
     'turn': state_game.turn,
     'captured_figures': state_game.captured_figures,
     'eliminated_players': state_game.eliminated_players,
-    'double_pawns': state_game.double_pawns
+    'double_pawns': state_game.double_pawns,
+    'kings_rooks_stayed': state_game.kings_rooks_stayed
   }));
 }
 

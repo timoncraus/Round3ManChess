@@ -68,10 +68,10 @@ class GameConsumer(AsyncWebsocketConsumer):
             state_dict['captured_figures'] = data['captured_figures']
             state_dict['eliminated_players'] = data['eliminated_players']
             state_dict['double_pawns'] = data['double_pawns']
+            state_dict['kings_rooks_stayed'] = data['kings_rooks_stayed']
 
             eliminated = state_dict['eliminated_players']
             eliminated_count = sum(1 for status in eliminated.values() if status)
-            print(eliminated_count)
             if eliminated_count == 2:
                 game.status = 'finished'
                 game.ended_at = timezone.now()

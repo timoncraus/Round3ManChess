@@ -124,8 +124,8 @@ export function upFigure(figure, other=false) {
             // state_click.chosenCellId - новая клетка, утверждаем на ней фигуру
             let clear = [];
             let edit_new = {};
-            const oldCellId = state_click.chosenCellId;
-            const newCellId = figure.cellId;
+            const newCellId = state_click.chosenCellId;
+            const oldCellId = figure.cellId;
 
             
             const [char, number] = parseCellId(state_click.chosenCellId);
@@ -135,12 +135,73 @@ export function upFigure(figure, other=false) {
 
             removeEnemy(figure, player, char, number, clear);
 
-            if( kind === "pawn" && (number === 12 || number === 1) ) {
+            if( kind === "pawn" && (number === 12 || number === 1) ) { // пешка становится королевой
                 figure.name = "queen-" + player;
                 clear.push(figure.cellId);
                 edit_new[state_click.chosenCellId] = figure.name;
                 updateFiguresPos(figure);
                 drawAllFigures();
+            }
+            else if( kind === "king" && state_game.kings_rooks_stayed.includes(oldCellId)) { //рокировка
+                clear.push(figure.cellId);
+                edit_new[state_click.chosenCellId] = figure.name;
+                updateFiguresPos(figure);
+
+                
+                const [sideChar1_2, sideNumber1_2] = moveToCell(prevChar, prevNumber, 0, -2);
+                const [sideChar2_2, sideNumber2_2] = moveToCell(prevChar, prevNumber, 0, 2);
+
+                if(char === sideChar1_2) {
+                    const [sideChar1, sideNumber1] = moveToCell(prevChar, prevNumber, 0, -3);
+                    let rook1 = null;
+                    for (const someFigure of document.querySelectorAll(".figure")) {
+                        if(someFigure.cellId === sideChar1 + sideNumber1) {
+                            rook1 = someFigure;
+                            break;
+                        }
+                    }
+                    if(rook1 !== null) {
+                        downFigure(rook1);
+
+                        const [sideChar1_1, sideNumber1_1] = moveToCell(prevChar, prevNumber, 0, -1);
+                        upCell(document.querySelector("#" + sideChar1_1 + sideNumber1_1), true);
+
+                        const index = state_game.kings_rooks_stayed.indexOf(sideChar1 + sideNumber1);
+                        if (index !== -1) {
+                            state_game.kings_rooks_stayed.splice(index, 1);
+                        }
+                        clear.push(sideChar1 + sideNumber1);
+                        edit_new[sideChar1_1 + sideNumber1_1] = rook1.name;
+                        updateFiguresPos(rook1);
+                    }
+                }
+                else if(char === sideChar2_2) {
+                    const [sideChar2, sideNumber2] = moveToCell(prevChar, prevNumber, 0, 4);
+                    let rook2 = null;
+
+                    for (const someFigure of document.querySelectorAll(".figure")) {
+                        if(someFigure.cellId === sideChar2 + sideNumber2) {
+                            rook2 = someFigure;
+                            break;
+                        }
+                    }
+
+                    if(rook2 !== null) {
+                        downFigure(rook2);
+
+                        const [sideChar2_1, sideNumber2_1] = moveToCell(prevChar, prevNumber, 0, 1);
+                        upCell(document.querySelector("#" + sideChar2_1 + sideNumber2_1), true);
+
+                        const index = state_game.kings_rooks_stayed.indexOf(sideChar2 + sideNumber2);
+                        if (index !== -1) {
+                            state_game.kings_rooks_stayed.splice(index, 1);
+                        }
+                        clear.push(sideChar2 + sideNumber2);
+                        edit_new[sideChar2_1 + sideNumber2_1] = rook2.name;
+                        updateFiguresPos(rook2);
+                    }
+
+                }
             }
             else {
                 clear.push(figure.cellId);
@@ -148,10 +209,17 @@ export function upFigure(figure, other=false) {
                 updateFiguresPos(figure);
             }
 
+            if( kind === "rook" || kind === "king") {
+                const index = state_game.kings_rooks_stayed.indexOf(oldCellId);
+                if (index !== -1) {
+                    state_game.kings_rooks_stayed.splice(index, 1);
+                }
+            }
+
             changeTurn();
 
             if(!state_game.local) {
-                sendMove(oldCellId, newCellId, clear, edit_new);
+                sendMove(newCellId, oldCellId, clear, edit_new);
             }
             
             
@@ -183,15 +251,17 @@ function removeEnemy(figure, player, char, number, clear) {
             }
         });
     }
-    else if(state_game.double_pawns[sideChar + sideNumber + "-double-pawn"] === true) {
+    else if(state_game.double_pawns.includes(sideChar + sideNumber)) {
         document.querySelectorAll(".figure").forEach(existingFigure => {
             const [exKind, exPlayer] = figure.name.split("-");
             if (existingFigure.cellId === sideChar + sideNumber) {
                 state_game.figures_pos[sideChar + sideNumber] = null;
-                state_game.double_pawns[sideChar + sideNumber + "-double-pawn"] = null;
-
+                const index = state_game.double_pawns.indexOf(sideChar + sideNumber);
+                if (index !== -1) {
+                    state_game.double_pawns.splice(index, 1);
+                }
                 const [exKind, exPlayer] = existingFigure.name.split("-");
-                if(player !== exPlayer || state_game.crazy) {
+                if(player !== exPlayer && !state_game.crazy) {
                     clear.push(existingFigure.cellId);
                     removeFigure(player, existingFigure);
                 }
@@ -215,10 +285,13 @@ function setDoublePawnMark(figure, kind, number, prevNumber) {
     if(kind === "pawn") {
         if( (figure.pawnDirection === 1 && number === 4 && prevNumber === 2) || 
                                 (figure.pawnDirection === -1 && number === 9 && prevNumber === 11) ) {
-            state_game.double_pawns[state_click.chosenCellId + "-double-pawn"] = true;
+            state_game.double_pawns.push(state_click.chosenCellId);
         }
-        else if(state_game.double_pawns[state_click.chosenCellId + "-double-pawn"] === true) {
-            state_game.double_pawns[state_click.chosenCellId + "-double-pawn"] = null;
+        else if(state_game.double_pawns.includes(state_click.chosenCellId)) {
+            const index = state_game.double_pawns.indexOf(state_click.chosenCellId);
+            if (index !== -1) {
+                state_game.double_pawns.splice(index, 1);
+            }
         }
     }
     

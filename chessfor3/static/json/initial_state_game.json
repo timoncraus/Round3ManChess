@@ -12,7 +12,12 @@
         "white": false,
         "gray": false
     },
-    "double_pawns": {},
+    "double_pawns": [],
+    "kings_rooks_stayed": [
+        "A1","D1", "H1",
+        "I1", "L1", "D12",
+        "E12", "H12", "L12"
+    ],
     "figures_pos": {
         "A1": "rook-white",
         "B1": "knight-white",

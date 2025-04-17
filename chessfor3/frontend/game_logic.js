@@ -195,7 +195,7 @@ function pushDiagPawnCell(availCells, figure, player, char, number, right) {
     [char, number, up] = moveToDiagCell(char, number, up, right, offset);
 
     if(state_game.figures_pos[char + number] !== null && state_game.figures_pos[char + number] !== undefined ||
-        (state_game.double_pawns[sideChar + sideNumber + "-double-pawn"] === true && sidePlayer !== player)) {
+        (state_game.double_pawns.includes(sideChar + sideNumber) && sidePlayer !== player)) {
         addCheckCell(availCells, figure, player, char, number, oldChar, oldNumber);
     }
     
@@ -276,6 +276,37 @@ function getKingCells(availCells, figure, player, char, number) {
     pushDiagCell(availCells, figure, player, char, number, 1, -1);
     pushDiagCell(availCells, figure, player, char, number, -1, 1);
     pushDiagCell(availCells, figure, player, char, number, -1, -1);
+
+    if(state_game.kings_rooks_stayed.includes(char + number)) {
+        const [sideChar1, sideNumber1] = moveToCell(char, number, 0, -3);
+        if(state_game.kings_rooks_stayed.includes(sideChar1 + sideNumber1)) {
+            const [sideChar1_1, sideNumber1_1] = moveToCell(char, number, 0, -1);
+            const [sideChar1_2, sideNumber1_2] = moveToCell(char, number, 0, -2);
+            const cond1 = state_game.figures_pos[sideChar1_1 + sideNumber1_1] === undefined || 
+                                    state_game.figures_pos[sideChar1_1 + sideNumber1_1] === null
+            const cond2 = state_game.figures_pos[sideChar1_2 + sideNumber1_2] === undefined || 
+                                    state_game.figures_pos[sideChar1_2 + sideNumber1_2] === null
+            if(cond1 && cond2) {
+                availCells.push(sideChar1_2 + sideNumber1_2);
+            }
+        }
+
+        const [sideChar2, sideNumber2] = moveToCell(char, number, 0, 4);
+        if(state_game.kings_rooks_stayed.includes(sideChar2 + sideNumber2)) {
+            const [sideChar2_1, sideNumber2_1] = moveToCell(char, number, 0, 1);
+            const [sideChar2_2, sideNumber2_2] = moveToCell(char, number, 0, 2);
+            const [sideChar2_3, sideNumber2_3] = moveToCell(char, number, 0, 3);
+            const cond1 = state_game.figures_pos[sideChar2_1 + sideNumber2_1] === undefined || 
+                                    state_game.figures_pos[sideChar2_1 + sideNumber2_1] === null
+            const cond2 = state_game.figures_pos[sideChar2_2 + sideNumber2_2] === undefined || 
+                                    state_game.figures_pos[sideChar2_2 + sideNumber2_2] === null
+            const cond3 = state_game.figures_pos[sideChar2_3 + sideNumber2_3] === undefined || 
+                                    state_game.figures_pos[sideChar2_3 + sideNumber2_3] === null
+            if(cond1 && cond2 && cond3) {
+                availCells.push(sideChar2_2 + sideNumber2_2);
+            }
+        }
+    }
 
     return availCells;
 }
